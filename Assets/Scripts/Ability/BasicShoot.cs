@@ -7,9 +7,6 @@ public class BasicShoot : Ability_Direction
     //===========================
     //      Variables
     //===========================
-	// variables
-	float ballSpeed = 50;
-
     // Transform Part
     Transform BallPosition_Shoot;
 
@@ -61,12 +58,26 @@ public class BasicShoot : Ability_Direction
         ball.Shot(this);
 
         // Give ball a force to fly
-        ball.GetComponent<Rigidbody>().velocity = new Vector3(AimingVector.x * ballSpeed, 0, AimingVector.z * ballSpeed);
+		float startSpeed = GetBallStartSpeed();
+		ball.GetComponent<Rigidbody>().velocity = new Vector3(AimingVector.x * startSpeed, 0, AimingVector.z * startSpeed);
 	}
 
-	public override void BallHitAction(DodgeBall ball, Character hitCharacter)
+	public override void BallHitAction(Collision col, DodgeBall ball, Character hitCharacter)
 	{
-		float damage = 10;
-        hitCharacter.RecieveDamage(damage);
+		hitCharacter.RecieveDamage(GetBallDamage(ball));
+	}
+
+	//---------------------------
+	//      Other
+	//---------------------------
+	public virtual float GetBallStartSpeed()
+	{
+		float ballSpeedMultiplier = 0.35f;
+		return ownerCharacter.power * ballSpeedMultiplier;
+	}
+
+	public virtual float GetBallDamage(DodgeBall ball)
+	{
+		return Mathf.Floor(ball.rb.velocity.magnitude);
 	}
 }

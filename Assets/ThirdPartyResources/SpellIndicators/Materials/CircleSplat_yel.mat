@@ -6,7 +6,7 @@ Material:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: ConeSplat_yellow
+  m_Name: CircleSplat_yel
   m_Shader: {fileID: 4800000, guid: 1680001102e8306489fdcfe418272278, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 5
@@ -27,12 +27,12 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _ShadowTex:
-        m_Texture: {fileID: 2800000, guid: 996957aad7bfbc04fb720a555ccd5f5c, type: 3}
+        m_Texture: {fileID: 2800000, guid: b31f7644e112ff646b9bc778f057c99f, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
     - _InvFade: 1
     m_Colors:
-    - _Color: {r: 0.9760649, g: 1, b: 0.5661765, a: 1}
+    - _Color: {r: 1, g: 0.97008115, b: 0.5661765, a: 1}
     - _Tint: {r: 0, g: 0.5019608, b: 1, a: 0}
     - _TintColor: {r: 0.5, g: 0.5, b: 0.5, a: 0.5}

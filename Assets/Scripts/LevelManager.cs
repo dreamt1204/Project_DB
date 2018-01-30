@@ -41,6 +41,7 @@ public class LevelManager : MonoBehaviour
 		myPlayer.teamPos = 0;
 	}
 
+	// Spawn character for each player
 	void InitCharacters()
 	{
 		for (int i = 0; i < player.GetLength(0); i++)

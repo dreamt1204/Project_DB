@@ -119,9 +119,9 @@ Rigidbody:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1896993451207320}
   serializedVersion: 2
-  m_Mass: 1
+  m_Mass: 100
   m_Drag: 0
-  m_AngularDrag: 0.05
+  m_AngularDrag: 0
   m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 0
@@ -140,8 +140,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ownerPlayer: {fileID: 0}
   status: 0
-  stamina: 100
+  castingAbility: {fileID: 0}
+  health: 100
+  power: 100
   speed: 100
+  defend: 100
   BasicShootPrefab: {fileID: 114775826133262592, guid: 4d0f6dcd5373f453fbd5aa79f6f09bfe,
     type: 2}
   BasicCatchPrefab: {fileID: 114164005312262480, guid: cc87ecc42e1784eb795c132959df970c,

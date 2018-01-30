@@ -17,15 +17,16 @@ public class Character : MonoBehaviour
 	LevelManager level = LevelManager.instance;
 	[HideInInspector] public PlayerController ownerPlayer;
 	[HideInInspector] public CharacterStatus status;
-	float healthMax;
-	float health;
+	float currentHealth = 0;
 	DodgeBall ball;
 	[HideInInspector] public Ability castingAbility;
 
 	// Attributes
 	[Header("Attributes")]
-	public float stamina = 100;
-	public float speed = 100;
+	[Range(0, 200)] public float health = 100;
+	[Range(0, 200)] public float power = 100;
+	[Range(0, 200)] public float speed = 100;
+	[Range(0, 200)] public float defend = 100;
     
 	// Attribute multipliers
 	const float speedMultiplier = 0.05f;
@@ -41,22 +42,22 @@ public class Character : MonoBehaviour
 	UIManager uiManager;
 	UIJoyStick_Movement movementJoystick;
 
-	// Transform Part
+	// Transform parts
 	[HideInInspector] public Transform BallPosition_Hold;
 	[HideInInspector] public Transform BallPosition_Shoot;
 
 	//---------------------------
 	//      Properties
 	//---------------------------
-	public float Health
+	public float CurrentHealth
 	{
 		get
 		{
-			return health;
+			return currentHealth;
 		}
 		set
 		{
-			health = Mathf.Clamp(value, 0, healthMax);
+			currentHealth = Mathf.Clamp(value, 0, health);
 		}
 	}
 
@@ -88,8 +89,7 @@ public class Character : MonoBehaviour
 		BallPosition_Hold = gameObject.transform.Find("BallPosition_Hold").transform;
 
 		// Init attributes 
-		healthMax = CalculateMaxHealth(stamina);
-		Health = healthMax;
+		CurrentHealth = health;
 
 		// Init abilities
 		abilityPrefabs.Insert(0, BasicShootPrefab);
@@ -112,6 +112,8 @@ public class Character : MonoBehaviour
 	{
 		uiManager = GameObject.Find("UIManager").GetComponent<UIManager>();
 		movementJoystick = UIManager.GetJoystickObject("Widget_Joystick_Movement").GetComponentInChildren<UIJoyStick_Movement>();
+
+		uiManager.UpdateBasicAbilityJoytick(false);
 	}
 
 	//---------------------------
@@ -149,12 +151,9 @@ public class Character : MonoBehaviour
 	//---------------------------
 	public void TryPickUpBall(DodgeBall targetBall)
 	{
-		if (status != CharacterStatus.Idle)
+		if (ball !=null)
 			return;
 
-		if (targetBall.ownerCharacter == this)
-			return;
-		
 		PickUpBall(targetBall);
 	}
 
@@ -169,19 +168,13 @@ public class Character : MonoBehaviour
 	//---------------------------
 	public void RecieveDamage(float damage)
 	{
-		Health = Mathf.Clamp((Health - damage), 0, healthMax);
-		Debug.Log("Heath: " + Health);
+		CurrentHealth -= damage;
+		Debug.Log("Heath: " + CurrentHealth);
 	}
 
 	//===========================
 	//      Static Functions
 	//===========================
-	public static float CalculateMaxHealth(float stamina)
-	{
-		float healthMax = stamina;
-		return Mathf.Clamp(healthMax, 0, healthMax);
-	}
-
 	public static void SpawnCharacter(PlayerController player)
 	{
 		UTL.TryCatchError((player.characterPrefab == null), "This player doesn't have character prefab to spawn.");

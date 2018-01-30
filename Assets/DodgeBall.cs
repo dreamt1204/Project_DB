@@ -21,12 +21,13 @@ public class DodgeBall : MonoBehaviour
 
     // Variables
     [HideInInspector] public Character ownerCharacter;
+	[HideInInspector] public Rigidbody rb;
     BallStatus status;
     [HideInInspector] public Ability_Direction ActionAbility;
     [HideInInspector] public int AttackerTeam = -1;
 
-    // Const Var
-	const float safeSpeed = 3f;
+    // Const Variables
+	const float safeSpeed = 5f;
 
     //---------------------------
     //      Properties
@@ -41,6 +42,7 @@ public class DodgeBall : MonoBehaviour
 		set
 		{
 			status = value;
+			UpdateBallAttackData();
 			UpdatePhysics();
 			UpdateMaterial();
 		}
@@ -54,7 +56,8 @@ public class DodgeBall : MonoBehaviour
     //---------------------------
     void Start()
 	{
-		UpdateMaterial();
+		rb = GetComponent<Rigidbody>();
+		Status = BallStatus.Unpicked;
 	}
 
     //---------------------------
@@ -65,49 +68,56 @@ public class DodgeBall : MonoBehaviour
         UpdateShootingBallStatus();
     }
 
+	// Reset ball status to Unpicked if ball's velocity is lower than safe speed
     void UpdateShootingBallStatus()
 	{
 		if (Status != BallStatus.Shooting)
 			return;
 
 		float currentBallSpeed = gameObject.GetComponent<Rigidbody>().velocity.magnitude;
-		if (currentBallSpeed <= safeSpeed)
+		if (Mathf.Floor(currentBallSpeed) <= safeSpeed)
 		{
 			Status = BallStatus.Unpicked;
-            ActionAbility = null;
-            AttackerTeam = -1;
 		}
 	}
 
+	// Update ball's action ability and attacker team based on status
+	void UpdateBallAttackData()
+	{
+		if (Status == BallStatus.Unpicked)
+		{
+			ActionAbility = null;
+			AttackerTeam = -1;
+		}
+	}
+
+	// Update ball's material based on status
     void UpdateMaterial()
     {
         MeshRenderer render = gameObject.GetComponent<MeshRenderer>();
 
         if (status == BallStatus.Shooting)
-        {
-            render.material = MaterialDamage;
-        }
+			render.material = MaterialDamage;
         else
-        {
-            render.material = MaterialSafe;
-        }
+			render.material = MaterialSafe;
     }
 
+	// Update ball's physics based on status
     void UpdatePhysics()
     {
-        Rigidbody rb = gameObject.GetComponent<Rigidbody>();
-
-        if (status == BallStatus.Picked)
-        {
-            if (rb != null)
-                Destroy(rb);
-        }
-        else
-        {
-            if (rb == null)
-                gameObject.AddComponent<Rigidbody>();
-        }
+		if (status == BallStatus.Picked)
+			EnablePhysics(false);
+		else
+			EnablePhysics(true);
     }
+
+	// Enable / Disable ball rigidbody
+	void EnablePhysics(bool enabled)
+	{
+		Rigidbody rb = gameObject.GetComponent<Rigidbody>();
+		rb.detectCollisions = enabled;
+		rb.isKinematic = !enabled;
+	}
 
     //---------------------------
     //      Ball status action
@@ -136,16 +146,18 @@ public class DodgeBall : MonoBehaviour
     //---------------------------
     void OnCollisionEnter (Collision col)
 	{
-        Character hitCharacter = col.gameObject.GetComponent<Character>();
-        if (hitCharacter != null)
-            OnCharacterHit(hitCharacter);
+		OnCharacterHit(col);
     }
 
-    void OnCharacterHit(Character hitCharacter)
+	void OnCharacterHit(Collision col)
     {
-        if (Status == BallStatus.Unpicked)
+		Character hitCharacter = col.gameObject.GetComponent<Character>();
+		if (hitCharacter == null)
+			return;
+
+		if (Status == BallStatus.Unpicked)
             hitCharacter.TryPickUpBall(this);
         else if (Status == BallStatus.Shooting)
-            ActionAbility.BallHitAction(this, hitCharacter);
+			ActionAbility.BallHitAction(col, this, hitCharacter);
     }    
 }

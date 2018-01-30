@@ -59,7 +59,7 @@ public class Ability_Direction : Ability
 	{
 		float rotation = Mathf.Atan2(joystick.joyStickPosX, joystick.joyStickPosY) * 180 / Mathf.PI;
 		RangeIndicator.transform.rotation = Quaternion.Euler(0, rotation, 0);
-		AimingVector = new Vector3(joystick.joyStickPosX, 0, joystick.joyStickPosY);
+		AimingVector = new Vector3(joystick.joyStickPosX, 0, joystick.joyStickPosY).normalized;
 	}
 
     //---------------------------
@@ -80,7 +80,7 @@ public class Ability_Direction : Ability
 		
 	}
 
-	public virtual void BallHitAction(DodgeBall ball, Character character)
+	public virtual void BallHitAction(Collision col, DodgeBall ball, Character hitCharacter)
 	{
 
 	}
