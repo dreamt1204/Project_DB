@@ -9,7 +9,10 @@ public class LevelManager : MonoBehaviour
     //===========================
     public static LevelManager instance;
 
-	[Header("Player")]
+    [Header("Resources")]
+    public PrefabManager prefabManager;
+
+    [Header("Player")]
 	public PlayerController myPlayer;
 	[HideInInspector] public PlayerController[,] player = new PlayerController[2, 3];
 

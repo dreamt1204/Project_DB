@@ -23,18 +23,16 @@ public class Character : MonoBehaviour
 
 	// Attributes
 	[Header("Attributes")]
-	[Range(0, 200)] public float health = 100;
-	[Range(0, 200)] public float power = 100;
-	[Range(0, 200)] public float speed = 100;
-	[Range(0, 200)] public float defend = 100;
+	[Range(1, 200)] public float health = 100;
+	[Range(1, 200)] public float speed = 100;
+    [Range(1, 200)] public float power = 100;
+    [Range(1, 200)] public float defend = 100;
     
 	// Attribute multipliers
 	const float speedMultiplier = 0.05f;
 
 	// Abilities
 	[Header("Abilities")]
-	public Ability BasicShootPrefab;
-	public Ability BasicCatchPrefab;
 	public List<Ability> abilityPrefabs = new List<Ability>();
 	[HideInInspector] public List<Ability> abilities = new List<Ability>();
 
@@ -91,9 +89,9 @@ public class Character : MonoBehaviour
 		// Init attributes 
 		CurrentHealth = health;
 
-		// Init abilities
-		abilityPrefabs.Insert(0, BasicShootPrefab);
-		abilityPrefabs.Insert(1, BasicCatchPrefab);
+        // Init abilities
+        abilityPrefabs.Insert(0, level.prefabManager.BasicShootPrefab);
+        abilityPrefabs.Insert(1, level.prefabManager.BasicCatchPrefab);
 
 		for (int i = 0; i < abilityPrefabs.Count; i++)
 		{
