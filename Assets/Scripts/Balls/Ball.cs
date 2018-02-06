@@ -2,16 +2,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum BallStatus
+public enum BallState
 {
 	Unpicked,
-    Picking,
 	Picked,
 	Shooting
 }
 
 [RequireComponent(typeof(PhotonView))]
-public class DodgeBall : Photon.MonoBehaviour, IPunObservable
+public class Ball : Photon.MonoBehaviour, IPunObservable
 {
     //===========================
     //      Variables
@@ -26,8 +25,10 @@ public class DodgeBall : Photon.MonoBehaviour, IPunObservable
 
     // Variables
     [HideInInspector] public Character ownerCharacter;
-	[HideInInspector] public Rigidbody rb;
-    BallStatus status;
+	[HideInInspector] public Rigidbody body;
+    BallState state;
+
+    // ??
     [HideInInspector] public Ability_Direction ActionAbility;
     [HideInInspector] public Team AttackerTeam = Team.None;
 
@@ -37,29 +38,22 @@ public class DodgeBall : Photon.MonoBehaviour, IPunObservable
     //---------------------------
     //      Properties
     //---------------------------
-    public BallStatus Status
+    public BallState State
 	{
 		get
 		{ 
-			return status;
+			return state;
 		}
 
 		set
 		{
-			status = value;
+            state = value;
 
-            if (status == BallStatus.Picking)
-            {
-                this.gameObject.SetActive(false);
-            }
-            else
-            {
-                this.gameObject.SetActive(true);
-                UpdateBallAttackData();
-                UpdatePhysics();
-                UpdateMaterial();
-            }
-		}
+            UpdateBallVisibility();
+            UpdateBallAttackData();
+            UpdatePhysics();
+            UpdateMaterial();
+        }
 	}
 
     //===========================
@@ -70,49 +64,55 @@ public class DodgeBall : Photon.MonoBehaviour, IPunObservable
     //---------------------------
     void Start()
 	{
-		rb = GetComponent<Rigidbody>();
-		Status = BallStatus.Unpicked;
+		body = GetComponent<Rigidbody>();
+        state = BallState.Unpicked;
 	}
 
     //---------------------------
     //      Update Functions
     //---------------------------
+    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {
+        if (stream.isWriting)
+        {
+            stream.SendNext(State);
+            stream.SendNext(Character.GetPhotonViewIDFromCharacter(ownerCharacter));
+        }
+        else
+        {
+            State = (BallState)stream.ReceiveNext();
+            ownerCharacter = Character.GetCharacterFromViewID((int)stream.ReceiveNext());
+        }
+    }
+
     void Update()
     {
         UpdateShootingBallStatus();
     }
 
-    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
-    {
-        if (stream.isWriting)
-        {
-            stream.SendNext(Status);
-            stream.SendNext(Character.GetPhotonViewIDFromCharacter(ownerCharacter));
-        }
-        else
-        {
-            Status = (BallStatus)stream.ReceiveNext();
-            ownerCharacter = Character.GetCharacterFromViewID((int)stream.ReceiveNext());
-        }
-    }
-
     // Reset ball status to Unpicked if ball's velocity is lower than safe speed
     void UpdateShootingBallStatus()
 	{
-		if (Status != BallStatus.Shooting)
+		if (State != BallState.Shooting)
 			return;
 
 		float currentBallSpeed = gameObject.GetComponent<Rigidbody>().velocity.magnitude;
 		if (Mathf.Floor(currentBallSpeed) <= safeSpeed)
 		{
-			Status = BallStatus.Unpicked;
+            State = BallState.Unpicked;
 		}
 	}
 
-	// Update ball's action ability and attacker team based on status
-	void UpdateBallAttackData()
+    // Update ball visiblity based on ball state
+    void UpdateBallVisibility()
+    {
+        this.gameObject.SetActive(State != BallState.Picked);
+    }
+
+    // Update ball's action ability and attacker team based on status
+    void UpdateBallAttackData()
 	{
-		if (Status == BallStatus.Unpicked)
+		if (State == BallState.Unpicked)
 		{
 			ActionAbility = null;
 			AttackerTeam = Team.None;
@@ -124,7 +124,7 @@ public class DodgeBall : Photon.MonoBehaviour, IPunObservable
     {
         MeshRenderer render = gameObject.GetComponent<MeshRenderer>();
 
-        if (status == BallStatus.Shooting)
+        if (State == BallState.Shooting)
 			render.material = MaterialDamage;
         else
 			render.material = MaterialSafe;
@@ -133,7 +133,7 @@ public class DodgeBall : Photon.MonoBehaviour, IPunObservable
 	// Update ball's physics based on status
     void UpdatePhysics()
     {
-		if (status == BallStatus.Picked)
+		if (State == BallState.Picked)
 			EnablePhysics(false);
 		else
 			EnablePhysics(true);
@@ -152,7 +152,7 @@ public class DodgeBall : Photon.MonoBehaviour, IPunObservable
     //---------------------------
     public void TryPickUp(Character target)
     {
-        if (target.Status != PlayerStatus.None)
+        if (target.State != PlayerState.None)
             return;
 
         if (sentPickup)
@@ -160,20 +160,17 @@ public class DodgeBall : Photon.MonoBehaviour, IPunObservable
 
         sentPickup = true;
 
-        Status = BallStatus.Picking;
         this.photonView.RPC("PickUp", PhotonTargets.AllViaServer, Character.GetPhotonViewIDFromCharacter(target));
     }
 
     [PunRPC]
     void PickUp(int BallHolderViewID)
     {
-        Status = BallStatus.Picked;
+        State = BallState.Picked;
         ownerCharacter = Character.GetCharacterFromViewID(BallHolderViewID);
 
-        ownerCharacter.Status = PlayerStatus.HoldingBall;
+        ownerCharacter.State = PlayerState.HoldingBall;
         AttackerTeam = ownerCharacter.ownerPlayer.GetTeam();
-        transform.position = ownerCharacter.BallPosition_Hold.position;
-        //transform.parent = ownerCharacter.BallPosition_Hold;
 
         sentPickup = false;
     }
@@ -186,7 +183,7 @@ public class DodgeBall : Photon.MonoBehaviour, IPunObservable
     [PunRPC]
     void Shot()
     {
-        Status = BallStatus.Shooting;
+        State = BallState.Shooting;
 
         ownerCharacter = null;
         //ActionAbility = shootAbility;
@@ -203,9 +200,9 @@ public class DodgeBall : Photon.MonoBehaviour, IPunObservable
         
         if (collider_char != null && collider_pv != null && collider_pv.isMine)
         {
-            if (Status == BallStatus.Unpicked)
+            if (State == BallState.Unpicked)
                 TryPickUp(collider_char);
-            else if (Status == BallStatus.Shooting)
+            else if (State == BallState.Shooting)
                 ActionAbility.BallHitAction(col, this, collider_char);
         }
     }

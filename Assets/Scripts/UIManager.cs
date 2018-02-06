@@ -9,7 +9,6 @@ public class UIManager : MonoBehaviour
 
     [Header("Control")]
     public GameObject Joystick_BasicShoot;
-	public GameObject Joystick_BasicCatch;
 
     //===========================
     //      Functions
@@ -32,12 +31,15 @@ public class UIManager : MonoBehaviour
     //---------------------------
     //      Control
     //---------------------------
-    public void UpdateBasicAbilityJoytick(bool hasBall)
+    public void UpdateBasicAbilityUI(bool hasBall)
 	{
-		EnableJoystickWidget(Joystick_BasicShoot, hasBall);
+        /*
+        EnableJoystickWidget(Joystick_BasicShoot, hasBall);
 		EnableJoystickWidget(Joystick_BasicCatch, !hasBall);
+        */
 	}
 
+    // ??
 	void EnableJoystickWidget(GameObject obj, bool enabled)
 	{
 		obj.SetActive(enabled);
@@ -51,6 +53,7 @@ public class UIManager : MonoBehaviour
 		return obj;
 	}
 
+    // ??
 	public static UIJoyStick_Ability_Direction GetJoystick(string widgetName)
 	{
         UIJoyStick_Ability_Direction joystick = GetJoystickObject(widgetName).GetComponentInChildren<UIJoyStick_Ability_Direction>();

@@ -24,7 +24,7 @@ public class Ability : MonoBehaviour
     //---------------------------
     public void StartInit(Character character)
     {
-        if (!character.isControllable)
+        if (!Character.CheckAuthority(character))
             return;
 
         Init(character);

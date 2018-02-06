@@ -47,10 +47,7 @@ public class Ability_Direction : Ability
     //---------------------------
     void Update()
 	{
-        if(ownerCharacter == null)
-            return;
-
-        if (!ownerCharacter.isControllable)
+        if (!Character.CheckAuthority(ownerCharacter))
             return;
 
         UpdateAiming();
@@ -86,7 +83,7 @@ public class Ability_Direction : Ability
 		
 	}
 
-	public virtual void BallHitAction(Collision col, DodgeBall ball, Character hitCharacter)
+	public virtual void BallHitAction(Collision col, Ball ball, Character hitCharacter)
 	{
 
 	}

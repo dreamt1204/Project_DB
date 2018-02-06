@@ -37,7 +37,7 @@ public class BasicShoot : Ability_Direction
         LevelManager.Ball.transform.position = BallPosition_Shoot.position;
 
         // Update ball status
-        LevelManager.Ball.Status = BallStatus.Shooting;
+        LevelManager.Ball.State = BallState.Shooting;
         LevelManager.Ball.ownerCharacter = null;
         LevelManager.Ball.transform.parent = null;
 
@@ -45,10 +45,10 @@ public class BasicShoot : Ability_Direction
         float startSpeed = GetBallStartSpeed();
         LevelManager.Ball.GetComponent<Rigidbody>().velocity = new Vector3(AimingVector.x * startSpeed, 0, AimingVector.z * startSpeed);
 
-        ownerCharacter.Status = PlayerStatus.None;
+        ownerCharacter.State = PlayerState.None;
     }
 
-    public override void BallHitAction(Collision col, DodgeBall ball, Character hitCharacter)
+    public override void BallHitAction(Collision col, Ball ball, Character hitCharacter)
 	{
 		hitCharacter.RecieveDamage(GetBallDamage(ball));
 	}
@@ -62,8 +62,8 @@ public class BasicShoot : Ability_Direction
 		return ownerCharacter.power * ballSpeedMultiplier;
 	}
 
-	public virtual float GetBallDamage(DodgeBall ball)
+	public virtual float GetBallDamage(Ball ball)
 	{
-		return Mathf.Floor(ball.rb.velocity.magnitude);
+		return Mathf.Floor(ball.body.velocity.magnitude);
 	}
 }

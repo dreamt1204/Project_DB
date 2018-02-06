@@ -9,15 +9,13 @@ public class PrefabManager : MonoBehaviour
     //===========================
     public static PrefabManager instance;
 
-    //===========================
-    //      Prefabs
-    //===========================
+    // Prefabs
     [Header("Characters")]
     public List<Character> CharacterPrefabs;
 
-    [Header("Abilities")]
+    [Header("Basic Abilities")]
     public Ability BasicShootPrefab;
-    public Ability BasicCatchPrefab;
+
 
     //===========================
     //      Functions
@@ -29,7 +27,7 @@ public class PrefabManager : MonoBehaviour
     }
 
     //---------------------------
-    //      Characters
+    //      Static Functions
     //---------------------------
     public static Character GetCharacterPrefab(int characterID)
     {

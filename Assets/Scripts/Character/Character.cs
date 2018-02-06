@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum PlayerStatus
+public enum PlayerState
 {
 	None,
 	HoldingBall,
@@ -12,7 +12,7 @@ public enum PlayerStatus
 }
 
 [RequireComponent(typeof(PhotonView))]
-public class Character : MonoBehaviour
+public class Character : MonoBehaviour, IPunObservable
 {
     //===========================
     //      Variables
@@ -20,12 +20,13 @@ public class Character : MonoBehaviour
     public CharacterData characterData;
 
     // Flags
-    bool isInited = false;
-    [HideInInspector] public bool isControllable = false;
+    bool isInitialized = false;
+    bool isControllable = false;
 
     // Variables
     [HideInInspector] public PhotonPlayer ownerPlayer;
-    PlayerStatus status;
+    PlayerState state;
+    Rigidbody body;
 
     // ??
     [HideInInspector] public Ability castingAbility;
@@ -55,14 +56,11 @@ public class Character : MonoBehaviour
 	UIManager uiManager;
 	UIJoyStick_Movement movementJoystick;
 
-    // Transform
-    [HideInInspector] public Transform BallPosition_Hold;
-	[HideInInspector] public Transform BallPosition_Shoot;
 
-	//---------------------------
-	//      Properties
-	//---------------------------
-	public float CurrentHealth
+    //---------------------------
+    //      Properties
+    //---------------------------
+    public float CurrentHealth
 	{
 		get
 		{
@@ -74,18 +72,24 @@ public class Character : MonoBehaviour
 		}
 	}
 
-	public PlayerStatus Status
+	public PlayerState State
     {
 		get
 		{
-			return status;
+			return state;
 		}
 		set
 		{
-            status = value;
+            state = value;
 
+            UpdatePlayerAnimation();
+
+
+            // ??
+            /*
             if (isControllable)
-                uiManager.UpdateBasicAbilityJoytick(status == PlayerStatus.HoldingBall);
+                uiManager.UpdateBasicAbilityUI(status == PlayerState.HoldingBall);
+            */
         }
 	}
     
@@ -105,6 +109,10 @@ public class Character : MonoBehaviour
     {
         ownerPlayer = player;
 
+        // Init instances
+        InitInstances();
+
+        // Init character name and object name
         characterName = characterData.characterName;
         this.gameObject.name = characterName + " (" + player.ID + ")";
 
@@ -112,17 +120,21 @@ public class Character : MonoBehaviour
         InitAttributes(characterData);
 
         // Init abilities
-        InitAbilities(characterData);
-
-        // Init Transform
-        InitVisualTransform(characterData);
+        //InitAbilities(characterData);
 
         // Init local character stuff
         if (isControllable)
-            InitMyCharacter();
-
+        {
+            InitUI();
+        }
+            
         // Set finished init flag
-        isInited = true;
+        isInitialized = true;
+    }
+
+    void InitInstances()
+    {
+        body = transform.GetComponent<Rigidbody>();
     }
 
     void InitAttributes(CharacterData data)
@@ -131,6 +143,7 @@ public class Character : MonoBehaviour
         speed = data.speed;
         power = data.power;
         defend = data.defend;
+
         CurrentHealth = health;
     }
 
@@ -147,31 +160,69 @@ public class Character : MonoBehaviour
         }
     }
 
-    void InitVisualTransform(CharacterData data)
-    {
-        BallPosition_Hold = gameObject.transform.Find("BallPosition_Hold").transform;
-    }
-
-    void InitMyCharacter()
+    void InitUI()
 	{
 		uiManager = GameObject.Find("GameManagers").GetComponent<UIManager>();
 		movementJoystick = UIManager.GetJoystickObject("Widget_Joystick_Movement").GetComponentInChildren<UIJoyStick_Movement>();
 
-		uiManager.UpdateBasicAbilityJoytick(false);
+		uiManager.UpdateBasicAbilityUI(false);
 	}
 
-	//---------------------------
-	//      Update Functions
-	//---------------------------
-	void Update()
+    //---------------------------
+    //      Update Functions
+    //---------------------------
+    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {
+        if (stream.isWriting)
+        {
+            stream.SendNext(State);
+        }
+        else
+        {
+            State = (PlayerState)stream.ReceiveNext();
+        }
+    }
+
+    void Update()
 	{
-        if (!isInited)
+        if (!isInitialized)
             return;
 
         if (isControllable)
         {
             UpdateMovement();
             UpdateKeyboardMovement();
+        }
+    }
+
+    void UpdatePlayerAnimation()
+    {
+        // tmp: placeholder art
+        GameObject Model_HoldingBall = null;
+        GameObject Model_AimingBall = null;
+        foreach (Transform child in transform)
+        {
+            if (child.gameObject.name == "Model_HoldingBall")
+                Model_HoldingBall = child.gameObject;
+
+            if (child.gameObject.name == "Model_AimingBall")
+                Model_AimingBall = child.gameObject;
+        }
+
+        if (State == PlayerState.HoldingBall)
+        {
+            Model_HoldingBall.SetActive(true);
+            Model_AimingBall.SetActive(false);
+        }
+        else if (State == PlayerState.AimingBall)
+        {
+            Model_HoldingBall.SetActive(false);
+            Model_AimingBall.SetActive(true);
+        }
+        else
+        {
+            Model_HoldingBall.SetActive(false);
+            Model_AimingBall.SetActive(false);
         }
     }
 
@@ -182,7 +233,7 @@ public class Character : MonoBehaviour
 	{
 		float speedFactor = speed * speedMultiplier;
 
-		transform.GetComponent<Rigidbody>().velocity = new Vector3(movementJoystick.joyStickPosX * speedFactor, 0, movementJoystick.joyStickPosY * speedFactor);
+        body.velocity = new Vector3(movementJoystick.joyStickPosX * speedFactor, 0, movementJoystick.joyStickPosY * speedFactor);
 	}
 
 	void UpdateKeyboardMovement()
@@ -193,7 +244,7 @@ public class Character : MonoBehaviour
 			return;
 
 		float speedFactor = speed * speedMultiplier;
-		transform.GetComponent<Rigidbody>().velocity = new Vector3(Input.GetAxis("Horizontal") * speedFactor, 0, Input.GetAxis("Vertical") * speedFactor);
+        body.velocity = new Vector3(Input.GetAxis("Horizontal") * speedFactor, 0, Input.GetAxis("Vertical") * speedFactor);
 	}
 
 	//---------------------------
@@ -204,6 +255,7 @@ public class Character : MonoBehaviour
 		CurrentHealth -= damage;
 		Debug.Log("Heath: " + CurrentHealth);
 	}
+
 
     //===========================
     //      Static Functions
