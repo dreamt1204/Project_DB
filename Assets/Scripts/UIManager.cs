@@ -4,10 +4,35 @@ using UnityEngine;
 
 public class UIManager : MonoBehaviour
 {
-	public GameObject Joystick_BasicShoot;
+    [Header("Screen")]
+    public GameObject Widget_Connecting;
+
+    [Header("Control")]
+    public GameObject Joystick_BasicShoot;
 	public GameObject Joystick_BasicCatch;
 
-	public void UpdateBasicAbilityJoytick(bool hasBall)
+    //===========================
+    //      Functions
+    //===========================
+    //---------------------------
+    //      Init Functions
+    //---------------------------
+    void Start()
+    {
+        // Enable connecting screen
+        Widget_Connecting.SetActive(true);
+    }
+
+    void OnJoinedRoom()
+    {
+        // Disable connecting screen
+        Widget_Connecting.SetActive(false);
+    }
+
+    //---------------------------
+    //      Control
+    //---------------------------
+    public void UpdateBasicAbilityJoytick(bool hasBall)
 	{
 		EnableJoystickWidget(Joystick_BasicShoot, hasBall);
 		EnableJoystickWidget(Joystick_BasicCatch, !hasBall);

@@ -54,8 +54,8 @@ MonoBehaviour:
   material: {fileID: 2100000, guid: 66f8dec87b44f4aadae20df936c64919, type: 2}
   mSprites:
   - name: Circle
-    x: 440
-    y: 111
+    x: 1270
+    y: 183
     width: 401
     height: 401
     borderLeft: 0
@@ -67,14 +67,40 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Movement-Icon-White
-    x: 0
-    y: 73
+    x: 1270
+    y: 585
     width: 439
     height: 439
     borderLeft: 0
     borderRight: 0
     borderTop: 0
     borderBottom: 0
+    paddingLeft: 0
+    paddingRight: 0
+    paddingTop: 0
+    paddingBottom: 0
+  - name: Rectangle
+    x: 0
+    y: 364
+    width: 668
+    height: 660
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 0
+    paddingRight: 0
+    paddingTop: 0
+    paddingBottom: 0
+  - name: Rectangle-Rounded
+    x: 669
+    y: 424
+    width: 600
+    height: 600
+    borderLeft: 50
+    borderRight: 50
+    borderTop: 50
+    borderBottom: 50
     paddingLeft: 0
     paddingRight: 0
     paddingTop: 0

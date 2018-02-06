@@ -2,46 +2,61 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum CharacterStatus
+public enum PlayerStatus
 {
-	Idle,
-	HoldingBall
+	None,
+	HoldingBall,
+    AimingBall,
+    ShootingBall,
+    CatchingBall
 }
 
+[RequireComponent(typeof(PhotonView))]
 public class Character : MonoBehaviour
 {
-	//===========================
-	//      Variables
-	//===========================
-	// Variables
-	LevelManager level = LevelManager.instance;
-	[HideInInspector] public PlayerController ownerPlayer;
-	[HideInInspector] public CharacterStatus status;
-	float currentHealth = 0;
-	DodgeBall ball;
-	[HideInInspector] public Ability castingAbility;
+    //===========================
+    //      Variables
+    //===========================
+    public CharacterData characterData;
+
+    // Flags
+    bool isInited = false;
+    [HideInInspector] public bool isControllable = false;
+
+    // Variables
+    [HideInInspector] public PhotonPlayer ownerPlayer;
+    PlayerStatus status;
+
+    // ??
+    [HideInInspector] public Ability castingAbility;
+
+    // Information
+    [Header("Information")]
+    [HideInInspector] public string characterName;
 
 	// Attributes
 	[Header("Attributes")]
-	[Range(1, 200)] public float health = 100;
-	[Range(1, 200)] public float speed = 100;
-    [Range(1, 200)] public float power = 100;
-    [Range(1, 200)] public float defend = 100;
-    
-	// Attribute multipliers
-	const float speedMultiplier = 0.05f;
+    [HideInInspector] [Range(1, 200)] public float health;
+    [HideInInspector] [Range(1, 200)] public float speed;
+    [HideInInspector] [Range(1, 200)] public float power;
+    [HideInInspector] [Range(1, 200)] public float defend;
+
+    float currentHealth = 0;
+
+    // Attribute multipliers
+    const float speedMultiplier = 0.05f;
 
 	// Abilities
 	[Header("Abilities")]
-	public List<Ability> abilityPrefabs = new List<Ability>();
+    [HideInInspector] public List<Ability> abilityPrefabs = new List<Ability>();
 	[HideInInspector] public List<Ability> abilities = new List<Ability>();
 
 	// UI elements
 	UIManager uiManager;
 	UIJoyStick_Movement movementJoystick;
 
-	// Transform parts
-	[HideInInspector] public Transform BallPosition_Hold;
+    // Transform
+    [HideInInspector] public Transform BallPosition_Hold;
 	[HideInInspector] public Transform BallPosition_Shoot;
 
 	//---------------------------
@@ -59,56 +74,87 @@ public class Character : MonoBehaviour
 		}
 	}
 
-	public DodgeBall Ball
-	{
+	public PlayerStatus Status
+    {
 		get
 		{
-			return ball;
+			return status;
 		}
 		set
 		{
-			ball = value;
+            status = value;
 
-			if (ownerPlayer == level.myPlayer)
-				uiManager.UpdateBasicAbilityJoytick(ball != null);
-		}
+            if (isControllable)
+                uiManager.UpdateBasicAbilityJoytick(status == PlayerStatus.HoldingBall);
+        }
 	}
+    
+    //===========================
+    //      Functions
+    //===========================
+    //---------------------------
+    //      Init Functions
+    //---------------------------
+    void OnPhotonInstantiate(PhotonMessageInfo info)
+    {
+        isControllable = info.sender.IsLocal;
+        Init(info.sender);
+    }
 
-	//===========================
-	//      Functions
-	//===========================
-	//---------------------------
-	//      Init Functions
-	//---------------------------
-	void Init(PlayerController player)
-	{
-		// Init variable intances
-		ownerPlayer = player;
-		BallPosition_Hold = gameObject.transform.Find("BallPosition_Hold").transform;
+    void Init(PhotonPlayer player)
+    {
+        ownerPlayer = player;
 
-		// Init attributes 
-		CurrentHealth = health;
+        characterName = characterData.characterName;
+        this.gameObject.name = characterName + " (" + player.ID + ")";
+
+        // Init attributes
+        InitAttributes(characterData);
 
         // Init abilities
-        abilityPrefabs.Insert(0, level.prefabManager.BasicShootPrefab);
-        abilityPrefabs.Insert(1, level.prefabManager.BasicCatchPrefab);
+        InitAbilities(characterData);
 
-		for (int i = 0; i < abilityPrefabs.Count; i++)
-		{
-			Ability newAbility = Instantiate(abilityPrefabs[i]).GetComponent<Ability>();
-			newAbility.transform.parent = transform;
-			abilities.Add(newAbility);
-			newAbility.Init(this);
-		}
+        // Init Transform
+        InitVisualTransform(characterData);
 
-		// My character specicific init
-		if (ownerPlayer == level.myPlayer)
-			InitMyCharacter();
-	}
+        // Init local character stuff
+        if (isControllable)
+            InitMyCharacter();
 
-	void InitMyCharacter()
+        // Set finished init flag
+        isInited = true;
+    }
+
+    void InitAttributes(CharacterData data)
+    {
+        health = data.health;
+        speed = data.speed;
+        power = data.power;
+        defend = data.defend;
+        CurrentHealth = health;
+    }
+
+    void InitAbilities(CharacterData data)
+    {
+        abilityPrefabs.Insert(0, PrefabManager.instance.BasicShootPrefab);
+
+        for (int i = 0; i < abilityPrefabs.Count; i++)
+        {
+            Ability newAbility = Instantiate(abilityPrefabs[i]).GetComponent<Ability>();
+            newAbility.transform.parent = transform;
+            abilities.Add(newAbility);
+            newAbility.StartInit(this);
+        }
+    }
+
+    void InitVisualTransform(CharacterData data)
+    {
+        BallPosition_Hold = gameObject.transform.Find("BallPosition_Hold").transform;
+    }
+
+    void InitMyCharacter()
 	{
-		uiManager = GameObject.Find("UIManager").GetComponent<UIManager>();
+		uiManager = GameObject.Find("GameManagers").GetComponent<UIManager>();
 		movementJoystick = UIManager.GetJoystickObject("Widget_Joystick_Movement").GetComponentInChildren<UIJoyStick_Movement>();
 
 		uiManager.UpdateBasicAbilityJoytick(false);
@@ -119,14 +165,20 @@ public class Character : MonoBehaviour
 	//---------------------------
 	void Update()
 	{
-		if (ownerPlayer == level.myPlayer)
-		{
-			UpdateMovement();
-			UpdateKeyboardMovement();
-		}
-	}
+        if (!isInited)
+            return;
 
-	void UpdateMovement()
+        if (isControllable)
+        {
+            UpdateMovement();
+            UpdateKeyboardMovement();
+        }
+    }
+
+    //---------------------------
+    //      Movement
+    //---------------------------
+    void UpdateMovement()
 	{
 		float speedFactor = speed * speedMultiplier;
 
@@ -145,23 +197,6 @@ public class Character : MonoBehaviour
 	}
 
 	//---------------------------
-	//      Ball
-	//---------------------------
-	public void TryPickUpBall(DodgeBall targetBall)
-	{
-		if (ball !=null)
-			return;
-
-		PickUpBall(targetBall);
-	}
-
-	public void PickUpBall(DodgeBall targetBall)
-	{
-		Ball = targetBall;
-		targetBall.PickedUp(this);
-	}
-
-	//---------------------------
 	//      Other
 	//---------------------------
 	public void RecieveDamage(float damage)
@@ -170,15 +205,50 @@ public class Character : MonoBehaviour
 		Debug.Log("Heath: " + CurrentHealth);
 	}
 
-	//===========================
-	//      Static Functions
-	//===========================
-	public static void SpawnCharacter(PlayerController player)
+    //===========================
+    //      Static Functions
+    //===========================
+    //---------------------------
+    //      Spawn
+    //---------------------------
+    public static void SpawnCharacter()
 	{
-		UTL.TryCatchError((player.characterPrefab == null), "This player doesn't have character prefab to spawn.");
+        PhotonPlayer localPlayer = PhotonNetwork.player;
+        Vector3 spawnPos = GameObject.Find("SpawnPoint_" + localPlayer.GetTeamString() + "_" + localPlayer.GetTeamPos().ToString()).transform.position;
+        string prefabName = PrefabManager.GetCharacterPrefab(localPlayer).name;
 
-		Vector3 spawnPos = GameObject.Find("Team" + player.team + "_SpawnPoint_" + player.teamPos).transform.position;
-		player.currentCharacter = Instantiate(player.characterPrefab, spawnPos, Quaternion.Euler(0, 0, 0)).GetComponent<Character>();
-		player.currentCharacter.Init(player);
-	}
+        PhotonNetwork.Instantiate(prefabName, spawnPos, Quaternion.identity, 0).GetComponent<Character>();
+    }
+    
+    //---------------------------
+    //      Check Functions
+    //---------------------------
+    public static bool CheckAuthority(Character character)
+    {
+        if (character == null)
+            return false;
+
+        if (!character.isControllable)
+            return false;
+
+        return true;
+    }
+
+    //---------------------------
+    //      Get Functions
+    //---------------------------
+    public static int GetPhotonViewIDFromCharacter(Character character)
+    {
+        UTL.TryCatchError(character.gameObject.GetPhotonView() == null, "Cannot find PhotonView for the input character.");
+
+        return character.gameObject.GetPhotonView().viewID;
+    }
+
+    public static Character GetCharacterFromViewID(int ViewID)
+    {
+        UTL.TryCatchError(PhotonView.Find(ViewID) == null, "Cannot find the character with PhotonViewID.");
+        UTL.TryCatchError(PhotonView.Find(ViewID).gameObject.GetComponent<Character>() == null, "Cannot find the character with PhotonViewID.");
+
+        return PhotonView.Find(ViewID).gameObject.GetComponent<Character>();
+    }
 }

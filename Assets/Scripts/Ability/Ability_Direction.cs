@@ -26,16 +26,16 @@ public class Ability_Direction : Ability
     //---------------------------
     public override void Init(Character character)
 	{
-		ownerCharacter = character;
+        ownerCharacter = character;
 
-		// Init UI button
-		InitJoystick();
+        // Init UI button
+        InitJoystick();
 
 		// Init range indicator
 		RangeIndicator = Instantiate(RangeIndicatorPrefab, ownerCharacter.transform.position, Quaternion.Euler(0, 0, 0));
 		RangeIndicator.transform.parent = ownerCharacter.transform;
 		RangeIndicator.SetActive(false);
-	}
+    }
 
 	public virtual void InitJoystick()
 	{
@@ -47,7 +47,13 @@ public class Ability_Direction : Ability
     //---------------------------
     void Update()
 	{
-		UpdateAiming();
+        if(ownerCharacter == null)
+            return;
+
+        if (!ownerCharacter.isControllable)
+            return;
+
+        UpdateAiming();
 	}
 
     public virtual void DisplayRangeIndicator(bool active)

@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f6e7e1410cd66f4da4060a708d2c452, type: 3}
+  m_Name: testCharacter
+  m_EditorClassIdentifier: 
+  characterName: Empty Character
+  model: {fileID: 1370440335894824, guid: 5b37e86040594cf418135eeea8a3abc1, type: 2}
+  health: 100
+  speed: 100
+  power: 100
+  defend: 100
+  abilityPrefabs:
+  - {fileID: 114775826133262592, guid: 4d0f6dcd5373f453fbd5aa79f6f09bfe, type: 2}

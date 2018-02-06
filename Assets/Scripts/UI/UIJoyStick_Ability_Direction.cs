@@ -97,7 +97,7 @@ public class UIJoyStick_Ability_Direction : MonoBehaviour
 
 	void OnPress(bool pressed)
 	{
-		if (enabled && NGUITools.GetActive(gameObject) && target != null)
+        if (enabled && NGUITools.GetActive(gameObject) && target != null)
 		{
 			mPressed = pressed;
 

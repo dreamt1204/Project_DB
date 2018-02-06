@@ -18,10 +18,10 @@ public class BasicShoot : Ability_Direction
     //---------------------------
     public override void Init(Character character)
 	{
-		base.Init(character);
+        base.Init(character);
 
-		BallPosition_Shoot = RangeIndicator.transform.Find("BallPosition_Shoot").transform;
-	}
+        BallPosition_Shoot = RangeIndicator.transform.Find("BallPosition_Shoot").transform;
+    }
 
 	public override void InitJoystick()
 	{
@@ -30,39 +30,25 @@ public class BasicShoot : Ability_Direction
 	}
 
     //---------------------------
-    //      Update Functions
-    //---------------------------
-    public override void DisplayRangeIndicator(bool active)
-	{
-		base.DisplayRangeIndicator(active);
-
-		if (active)
-		{
-            ownerCharacter.Ball.transform.position = BallPosition_Shoot.position;
-            ownerCharacter.Ball.transform.parent = BallPosition_Shoot;
-		}
-	}
-
-    //---------------------------
     //      Ability action
     //---------------------------
     public override void ActivateAbility()
 	{
-        // Grab ball
-        DodgeBall ball = ownerCharacter.Ball;
-		if (ball == null)
-			return;
+        LevelManager.Ball.transform.position = BallPosition_Shoot.position;
 
         // Update ball status
-        ownerCharacter.Ball = null;
-        ball.Shot(this);
+        LevelManager.Ball.Status = BallStatus.Shooting;
+        LevelManager.Ball.ownerCharacter = null;
+        LevelManager.Ball.transform.parent = null;
 
         // Give ball a force to fly
-		float startSpeed = GetBallStartSpeed();
-		ball.GetComponent<Rigidbody>().velocity = new Vector3(AimingVector.x * startSpeed, 0, AimingVector.z * startSpeed);
-	}
+        float startSpeed = GetBallStartSpeed();
+        LevelManager.Ball.GetComponent<Rigidbody>().velocity = new Vector3(AimingVector.x * startSpeed, 0, AimingVector.z * startSpeed);
 
-	public override void BallHitAction(Collision col, DodgeBall ball, Character hitCharacter)
+        ownerCharacter.Status = PlayerStatus.None;
+    }
+
+    public override void BallHitAction(Collision col, DodgeBall ball, Character hitCharacter)
 	{
 		hitCharacter.RecieveDamage(GetBallDamage(ball));
 	}

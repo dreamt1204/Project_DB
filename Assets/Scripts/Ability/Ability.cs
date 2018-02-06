@@ -22,6 +22,14 @@ public class Ability : MonoBehaviour
     //---------------------------
     //      Init Functions
     //---------------------------
+    public void StartInit(Character character)
+    {
+        if (!character.isControllable)
+            return;
+
+        Init(character);
+    }
+
     public virtual void Init(Character character)
     {
         ownerCharacter = character;
