@@ -15,7 +15,7 @@ public class Ability_Direction : Ability
     protected Vector3 AimingVector;
 
     // UI elements
-    protected UIJoyStick_Ability_Direction joystick;
+    protected UIJoyStick joystick;
 	
 
     //===========================
@@ -39,7 +39,8 @@ public class Ability_Direction : Ability
 
 	public virtual void InitJoystick()
 	{
-		joystick.ability = this;
+		// ??
+        //joystick.ability = this;
 	}
 
     //---------------------------
@@ -71,11 +72,12 @@ public class Ability_Direction : Ability
 	public virtual void ShowAbility(bool show)
 	{
 		DisplayRangeIndicator(show);
-
+        /*
 		if (show)
 			ownerCharacter.castingAbility = this;
 		else
 			ownerCharacter.castingAbility = null;
+        */
 	}
 
     public virtual void ActivateAbility()

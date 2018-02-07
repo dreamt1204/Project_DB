@@ -31,6 +31,7 @@ public class UIManager : MonoBehaviour
     //---------------------------
     //      Control
     //---------------------------
+    // ??
     public void UpdateBasicAbilityUI(bool hasBall)
 	{
         /*
@@ -43,21 +44,20 @@ public class UIManager : MonoBehaviour
 	void EnableJoystickWidget(GameObject obj, bool enabled)
 	{
 		obj.SetActive(enabled);
-		obj.transform.Find("Joystick").GetComponentInChildren<UIJoyStick_Ability_Direction>().ResetJoystick();
+		obj.transform.Find("Joystick").GetComponentInChildren<UIJoyStick>().ResetJoystick();
 	}
 
-	public static GameObject GetJoystickObject(string widgetName)
+    //---------------------------
+    //      Get Functions
+    //---------------------------
+	public static UIJoyStick GetJoystick(string widgetName)
 	{
-		GameObject obj = GameObject.Find(widgetName);
-		UTL.TryCatchError(obj == null, "Widget '" + widgetName + "' doesn't exist.");
-		return obj;
-	}
+        GameObject obj = GameObject.Find(widgetName);
+        UTL.TryCatchError(obj == null, "Cannot find object with widgetName: '" + widgetName + "'.");
 
-    // ??
-	public static UIJoyStick_Ability_Direction GetJoystick(string widgetName)
-	{
-        UIJoyStick_Ability_Direction joystick = GetJoystickObject(widgetName).GetComponentInChildren<UIJoyStick_Ability_Direction>();
-		UTL.TryCatchError(joystick == null, "Widget '" + widgetName + "' doesn't have joystick componenet.");
+        UIJoyStick joystick = obj.GetComponentInChildren<UIJoyStick>();
+		UTL.TryCatchError(joystick == null, "GameObject '" + widgetName + "' doesn't have joystick componenet attached.");
+
 		return joystick;
 	}
 }

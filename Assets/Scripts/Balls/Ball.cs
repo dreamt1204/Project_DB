@@ -5,7 +5,6 @@ using UnityEngine;
 public enum BallState : byte
 {
     Unpicked,
-	Picked,
 	Shooting
 }
 
@@ -150,7 +149,7 @@ public class Ball : Photon.MonoBehaviour, IPunObservable
     }
 
     //---------------------------
-    //      Ball status action
+    //      Ball state action
     //---------------------------
     void PickUp(Character target)
     {
@@ -168,7 +167,7 @@ public class Ball : Photon.MonoBehaviour, IPunObservable
     [PunRPC]
     void PickUp_RPC_owner()
     {
-        this.State = BallState.Picked;
+        // Since the ball is picked, let's destroy it.
         PhotonNetwork.Destroy(this.gameObject);
     }
 

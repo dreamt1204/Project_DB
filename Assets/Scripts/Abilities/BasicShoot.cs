@@ -26,7 +26,8 @@ public class BasicShoot : Ability_Direction
 	public override void InitJoystick()
 	{
 		joystick = UIManager.GetJoystick("Widget_Joystick_BasicShoot");
-		joystick.ability = this;
+		// ??
+        //joystick.ability = this;
 	}
 
     //---------------------------

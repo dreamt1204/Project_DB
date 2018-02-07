@@ -11,12 +11,12 @@ using System.Collections;
 /// </summary>
 
 [AddComponentMenu("NGUI/Interaction/JoyStick")]
-public class UIJoyStick_Ability_Direction : MonoBehaviour
+public class UIJoyStick : MonoBehaviour
 {
-	/// <summary>
-	/// Project_DB: The ability associate with this joystick
+    /// <summary>
+	/// Project_DB: The object listener associate with this joystick
 	/// </summary>
-	[HideInInspector] public Ability_Direction ability;
+	public GameObject listenerObject;
 
 	public enum DragEffect
 	{
@@ -25,7 +25,8 @@ public class UIJoyStick_Ability_Direction : MonoBehaviour
 		MomentumAndSpring,
 	}
 
-	public float joyStickPosX;
+    [Header("JoyStick Data")]
+    public float joyStickPosX;
 	public float joyStickPosY;
 	private float posDivision;
 
@@ -103,8 +104,8 @@ public class UIJoyStick_Ability_Direction : MonoBehaviour
 
 			if (pressed)
 			{
-				// Project_DB: Overridable function while joystick is pressed 
-				OnPressAction();
+                // Project_DB: Callback function while joystick is pressed 
+                OnReleased();
 
 				if (restrictWithinPanel && mPanel == null)
 					FindPanel();
@@ -137,8 +138,8 @@ public class UIJoyStick_Ability_Direction : MonoBehaviour
 			{
 				StartCoroutine("SpringPositionUpdate");
 
-				// Project_DB: Overridable function while joystick is released 
-				ReleasePressAction();
+                // Project_DB: Callback function while joystick is released 
+                OnReleased();
 			}
 		}
 	}
@@ -152,8 +153,8 @@ public class UIJoyStick_Ability_Direction : MonoBehaviour
 		//print ("haha");
 		if (enabled && NGUITools.GetActive(gameObject) && target != null)
 		{
-			// Project_DB: Overridable function while joystick is being dragged 
-			OnDragAction();
+			// Project_DB: Callback function while joystick is being dragged 
+			OnDragged();
 
 			UICamera.currentTouch.clickNotification = UICamera.ClickNotification.BasedOnDelta;
 
@@ -297,30 +298,32 @@ public class UIJoyStick_Ability_Direction : MonoBehaviour
 		target.localPosition = targetPosition;	
 		joyStickPosX = 0;
 		joyStickPosY = 0;
+    }
+
+    /// <summary>
+    /// Project_DB: Callback function while joystick is pressed
+    /// </summary>
+    void OnPressed()
+	{
+        if (listenerObject != null)
+            listenerObject.SendMessage("OnJoystickPressed", SendMessageOptions.DontRequireReceiver);
+    }
+
+    /// <summary>
+    /// Project_DB: Callback function while joystick is released
+    /// </summary>
+    void OnReleased()
+	{
+        if (listenerObject != null)
+            listenerObject.SendMessage("OnJoystickReleased", SendMessageOptions.DontRequireReceiver);
 	}
 
 	/// <summary>
-	/// Project_DB: Overridable function while joystick is pressed
+	/// Project_DB: Callback function while joystick is being dragged
 	/// </summary>
-	public virtual void OnPressAction()
+	void OnDragged()
 	{
-		
-	}
-
-	/// <summary>
-	/// Project_DB: Overridable function while joystick is released
-	/// </summary>
-	public virtual void ReleasePressAction()
-	{
-		ability.ShowAbility(false);
-		ability.ActivateAbility();
-	}
-
-	/// <summary>
-	/// Project_DB: Overridable function while joystick is being dragged
-	/// </summary>
-	public virtual void OnDragAction()
-	{
-		ability.ShowAbility(true);
-	}
+        if (listenerObject != null)
+            listenerObject.SendMessage("OnJoystickDragged", SendMessageOptions.DontRequireReceiver);
+    }
 }

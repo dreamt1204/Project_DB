@@ -28,19 +28,16 @@ public class Character : MonoBehaviour, IPunObservable
     PlayerState state;
     Rigidbody body;
 
-    // ??
-    [HideInInspector] public Ability castingAbility;
-
     // Information
     [Header("Information")]
-    [HideInInspector] public string characterName;
+    public string characterName;
 
 	// Attributes
 	[Header("Attributes")]
-    [HideInInspector] [Range(1, 200)] public float health;
-    [HideInInspector] [Range(1, 200)] public float speed;
-    [HideInInspector] [Range(1, 200)] public float power;
-    [HideInInspector] [Range(1, 200)] public float defend;
+    [Range(1, 200)] public float health;
+    [Range(1, 200)] public float speed;
+    [Range(1, 200)] public float power;
+    [Range(1, 200)] public float defend;
 
     float currentHealth = 0;
 
@@ -54,7 +51,7 @@ public class Character : MonoBehaviour, IPunObservable
 
 	// UI elements
 	UIManager uiManager;
-	UIJoyStick_Movement movementJoystick;
+	UIJoyStick joystickMovement;
 
 
     //---------------------------
@@ -120,7 +117,7 @@ public class Character : MonoBehaviour, IPunObservable
         InitAttributes(this.characterData);
 
         // Init abilities
-        //InitAbilities(this.characterData);
+        InitAbilities(this.characterData);
 
         // Init local character stuff
         if (this.isControllable)
@@ -149,23 +146,32 @@ public class Character : MonoBehaviour, IPunObservable
 
     void InitAbilities(CharacterData data)
     {
-        this.abilityPrefabs.Insert(0, PrefabManager.instance.BasicShootPrefab);
+        // Add basic abilities
+        this.abilityPrefabs.Add(PrefabManager.instance.BasicShootPrefab);
 
+        // Add character specific abilities
+        foreach (Ability ability in data.abilityPrefabs)
+        {
+            if (ability != null)
+                this.abilityPrefabs.Add(ability);
+        }
+
+        // Init abilities
         for (int i = 0; i < this.abilityPrefabs.Count; i++)
         {
-            Ability newAbility = Instantiate(this.abilityPrefabs[i]).GetComponent<Ability>();
-            newAbility.transform.parent = transform;
+            Ability newAbility = Instantiate(this.abilityPrefabs[i], this.transform.position, Quaternion.identity).GetComponent<Ability>();
+            newAbility.transform.parent = this.transform;
             this.abilities.Add(newAbility);
-            newAbility.StartInit(this);
+            newAbility.Init(this);
         }
     }
 
     void InitUI()
 	{
+        this.joystickMovement = UIManager.GetJoystick("Widget_Joystick_Movement");
+
         // ??
         this.uiManager = GameObject.Find("GameManagers").GetComponent<UIManager>();
-        this.movementJoystick = UIManager.GetJoystickObject("Widget_Joystick_Movement").GetComponentInChildren<UIJoyStick_Movement>();
-
         this.uiManager.UpdateBasicAbilityUI(false);
 	}
 
@@ -234,14 +240,14 @@ public class Character : MonoBehaviour, IPunObservable
 	{
 		float speedFactor = speed * speedMultiplier;
 
-        this.body.velocity = new Vector3(this.movementJoystick.joyStickPosX * speedFactor, 0, this.movementJoystick.joyStickPosY * speedFactor);
+        this.body.velocity = new Vector3(this.joystickMovement.joyStickPosX * speedFactor, 0, this.joystickMovement.joyStickPosY * speedFactor);
 	}
 
 	void UpdateKeyboardMovement()
 	{
-		if (this.movementJoystick.joyStickPosX != 0)
+		if (this.joystickMovement.joyStickPosX != 0)
 			return;
-		if (this.movementJoystick.joyStickPosY != 0)
+		if (this.joystickMovement.joyStickPosY != 0)
 			return;
 
 		float speedFactor = speed * speedMultiplier;
@@ -276,6 +282,7 @@ public class Character : MonoBehaviour, IPunObservable
     //---------------------------
     //      Check Functions
     //---------------------------
+    // ??
     public static bool CheckAuthority(Character character)
     {
         if (character == null)

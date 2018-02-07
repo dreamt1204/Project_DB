@@ -6,10 +6,7 @@ using UnityEngine;
 public class CharacterData : ScriptableObject
 {
     [Header("Information")]
-    public string characterName = "Empty Character";
-
-    [Header("Art")]
-    public GameObject model;
+    public string characterName = "No Name";
 
     [Header("Attributes")]
     [Range(1, 200)] public float health = 100;

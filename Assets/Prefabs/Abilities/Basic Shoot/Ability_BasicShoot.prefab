@@ -19,7 +19,7 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 4461615092745688}
-  - component: {fileID: 114775826133262592}
+  - component: {fileID: 114910732005346228}
   m_Layer: 0
   m_Name: Ability_BasicShoot
   m_TagString: Untagged
@@ -40,7 +40,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &114775826133262592
+--- !u!114 &114910732005346228
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -48,10 +48,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1578108875285634}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c0608f249eefb4e1f8dccf3452194ac4, type: 3}
+  m_Script: {fileID: 11500000, guid: d4d2bd1c96d50f146862eb9901fbd11a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   ownerCharacter: {fileID: 0}
-  type: 0
+  abilityName: Basic Shoot
   RangeIndicatorPrefab: {fileID: 1053441901937844, guid: 393130713424945718a63429e33abd29,
     type: 2}
