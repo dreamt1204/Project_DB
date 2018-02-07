@@ -49,10 +49,16 @@ public class Ball : Photon.MonoBehaviour, IPunObservable
 		{
             state = value;
 
-            UpdateBallVisibility();
-            UpdateBallAttackData();
-            UpdatePhysics();
             UpdateMaterial();
+
+
+
+            // ??
+            UpdateBallVisibility();
+
+            // ??
+            UpdatePhysics();
+            
         }
 	}
 
@@ -108,16 +114,6 @@ public class Ball : Photon.MonoBehaviour, IPunObservable
     {
         this.gameObject.SetActive(State != BallState.Picked);
     }
-
-    // Update ball's action ability and attacker team based on status
-    void UpdateBallAttackData()
-	{
-		if (State == BallState.Unpicked)
-		{
-			ActionAbility = null;
-			AttackerTeam = Team.None;
-		}
-	}
 
 	// Update ball's material based on status
     void UpdateMaterial()

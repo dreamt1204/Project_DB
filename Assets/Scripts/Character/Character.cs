@@ -114,7 +114,7 @@ public class Character : MonoBehaviour, IPunObservable
 
         // Init character name and object name
         characterName = characterData.characterName;
-        this.gameObject.name = characterName + " (" + player.ID + ")";
+        this.gameObject.name = characterName + " (P" + player.ID + ")";
 
         // Init attributes
         InitAttributes(characterData);
