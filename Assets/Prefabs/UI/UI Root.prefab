@@ -634,7 +634,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9d00418d2a2af4b109e18c85e0ffcd30, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ability: {fileID: 0}
+  listenerObject: {fileID: 0}
   joyStickPosX: 0
   joyStickPosY: 0
   target: {fileID: 4052738462754284}

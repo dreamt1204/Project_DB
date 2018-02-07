@@ -16,9 +16,9 @@ public class BasicShoot : Ability_Direction
     //---------------------------
     //      Init Functions
     //---------------------------
-    public override void Init(Character character)
+    public override void Init()
 	{
-        base.Init(character);
+        base.Init();
 
         BallPosition_Shoot = RangeIndicator.transform.Find("BallPosition_Shoot").transform;
     }

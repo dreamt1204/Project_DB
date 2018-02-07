@@ -45,4 +45,6 @@ MonoBehaviour:
   - PickUp
   - Shot
   - PickUp_RPC_owner
+  - UpdateBallState
+  - UpdatePlayerState
   DisableAutoOpenWizard: 1

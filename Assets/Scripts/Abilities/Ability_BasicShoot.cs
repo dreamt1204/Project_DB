@@ -24,15 +24,19 @@ public class Ability_BasicShoot : Ability
     //---------------------------
     //      Init Functions
     //---------------------------
-    public override void Init(Character character)
+    public override void Init()
     {
-        ownerCharacter = character;
+        base.Init();
 
-        // Init UI button
-        InitJoystick();
+        // Initialization done by owner player
+        if (ownerCharacter.isControllable)
+        {
+            // Init UI button
+            InitJoystick();
 
-        // Init range indicator
-        InitRangeIndicator();
+            // Init range indicator
+            InitRangeIndicator();
+        }
     }
 
     void InitJoystick()
@@ -52,7 +56,13 @@ public class Ability_BasicShoot : Ability
     //---------------------------
     void Update()
     {
-        UpdateAiming();
+        if (ownerCharacter.isControllable)
+        {
+            if ((joystick != null) && (RangeIndicator != null))
+            {
+                UpdateAiming();
+            }
+        }
     }
 
     void UpdateAiming()
@@ -88,8 +98,13 @@ public class Ability_BasicShoot : Ability
     {
         AimingJoystick = isAiming;
 
-        if (!isAiming)
+        if (isAiming)
         {
+            ownerCharacter.State = PlayerState.AimingBall;
+        }
+        else
+        {
+            ownerCharacter.State = PlayerState.None;
             joystick.ResetJoystick();
         }
     }

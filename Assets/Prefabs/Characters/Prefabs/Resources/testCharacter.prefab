@@ -295,7 +295,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   characterData: {fileID: 11400000, guid: 5a4bc68377ec6e448a3d10b4ce334909, type: 2}
-  castingAbility: {fileID: 0}
   characterName: 
   health: 100
   speed: 100
@@ -390,7 +389,6 @@ MonoBehaviour:
   ObservedComponents:
   - {fileID: 114613223835864826}
   - {fileID: 114303167672115570}
-  - {fileID: 114604622264814306}
   ObservedComponentsFoldoutOpen: 1
   viewIdField: 0
   instantiationId: -1

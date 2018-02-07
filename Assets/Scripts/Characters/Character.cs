@@ -12,7 +12,7 @@ public enum PlayerState : byte
 }
 
 [RequireComponent(typeof(PhotonView))]
-public class Character : MonoBehaviour, IPunObservable
+public class Character : Photon.MonoBehaviour
 {
     //===========================
     //      Variables
@@ -20,8 +20,8 @@ public class Character : MonoBehaviour, IPunObservable
     public CharacterData characterData;
 
     // Flags
-    bool isInitialized = false;
-    bool isControllable = false;
+    bool isInited = false;
+    public bool isControllable = false;
 
     // Variables
     [HideInInspector] public PhotonPlayer ownerPlayer;
@@ -79,14 +79,16 @@ public class Character : MonoBehaviour, IPunObservable
 		{
             state = value;
 
-            UpdatePlayerAnimation();
+            if (this.photonView.isMine)
+            {
+                // Synce State over network
+                this.photonView.RPC("UpdatePlayerState", PhotonTargets.Others, this.state);
 
+                // Update basic ability UI
+                this.uiManager.UpdateBasicAbilityUI(this.state);
+            }
 
-            // ??
-            /*
-            if (this.isControllable)
-                this.uiManager.UpdateBasicAbilityUI(status == PlayerState.HoldingBall);
-            */
+            UpdatePlayerAnimation();                
         }
     }
     
@@ -116,17 +118,18 @@ public class Character : MonoBehaviour, IPunObservable
         // Init attributes
         InitAttributes(this.characterData);
 
-        // Init abilities
-        InitAbilities(this.characterData);
-
-        // Init local character stuff
+        // Initialization done by owner player
         if (this.isControllable)
         {
+            // Init abilities
+            InitAbilities(this.characterData);
+
+            // Init UI elements
             InitUI();
         }
 
         // Set finished init flag
-        this.isInitialized = true;
+        this.isInited = true;
     }
 
     void InitInstances()
@@ -156,43 +159,29 @@ public class Character : MonoBehaviour, IPunObservable
                 this.abilityPrefabs.Add(ability);
         }
 
-        // Init abilities
+        // Instantiate abilities over network
         for (int i = 0; i < this.abilityPrefabs.Count; i++)
         {
-            Ability newAbility = Instantiate(this.abilityPrefabs[i], this.transform.position, Quaternion.identity).GetComponent<Ability>();
-            newAbility.transform.parent = this.transform;
-            this.abilities.Add(newAbility);
-            newAbility.Init(this);
+            object[] instantiationData = new object[1];
+            instantiationData[0] = this;
+            Ability newAbility = PhotonNetwork.Instantiate(this.abilityPrefabs[i].name, this.transform.position, Quaternion.identity, 0, instantiationData).GetComponent<Ability>();
         }
     }
 
     void InitUI()
 	{
-        this.joystickMovement = UIManager.GetJoystick("Widget_Joystick_Movement");
-
-        // ??
         this.uiManager = GameObject.Find("GameManagers").GetComponent<UIManager>();
-        this.uiManager.UpdateBasicAbilityUI(false);
+
+        this.joystickMovement = UIManager.GetJoystick("Widget_Joystick_Movement");
+        this.uiManager.UpdateBasicAbilityUI(State);
 	}
 
     //---------------------------
     //      Update Functions
     //---------------------------
-    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
-    {
-        if (stream.isWriting)
-        {
-            stream.SendNext((byte)State);
-        }
-        else
-        {
-            State = (PlayerState)stream.ReceiveNext();
-        }
-    }
-
     void Update()
 	{
-        if (!this.isInitialized)
+        if (!this.isInited)
             return;
 
         if (this.isControllable)
@@ -202,9 +191,16 @@ public class Character : MonoBehaviour, IPunObservable
         }
     }
 
+    [PunRPC]
+    void UpdatePlayerState(PlayerState newState)
+    {
+        if (State != newState)
+            State = newState;
+    }
+
     void UpdatePlayerAnimation()
     {
-        // tmp: placeholder art
+        // tmp: placeholder art/animation
         GameObject Model_HoldingBall = null;
         GameObject Model_AimingBall = null;
         foreach (Transform child in transform)
@@ -277,40 +273,5 @@ public class Character : MonoBehaviour, IPunObservable
         string prefabName = PrefabManager.GetCharacterPrefab(localPlayer).name;
 
         PhotonNetwork.Instantiate(prefabName, spawnPos, Quaternion.identity, 0).GetComponent<Character>();
-    }
-    
-    //---------------------------
-    //      Check Functions
-    //---------------------------
-    // ??
-    public static bool CheckAuthority(Character character)
-    {
-        if (character == null)
-            return false;
-
-        if (!character.isControllable)
-            return false;
-
-        return true;
-    }
-
-    //---------------------------
-    //      Get Functions
-    //---------------------------
-
-    // ??
-    public static int GetPhotonViewIDFromCharacter(Character character)
-    {
-        UTL.TryCatchError(character.gameObject.GetPhotonView() == null, "Cannot find PhotonView for the input character.");
-
-        return character.gameObject.GetPhotonView().viewID;
-    }
-
-    public static Character GetCharacterFromViewID(int ViewID)
-    {
-        UTL.TryCatchError(PhotonView.Find(ViewID) == null, "Cannot find the character with PhotonViewID.");
-        UTL.TryCatchError(PhotonView.Find(ViewID).gameObject.GetComponent<Character>() == null, "Cannot find the character with PhotonViewID.");
-
-        return PhotonView.Find(ViewID).gameObject.GetComponent<Character>();
     }
 }

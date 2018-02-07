@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Ability : MonoBehaviour
+[RequireComponent(typeof(PhotonView))]
+public class Ability : Photon.MonoBehaviour
 {
     //===========================
     //      Variables
@@ -17,9 +18,21 @@ public class Ability : MonoBehaviour
     //---------------------------
     //      Init Functions
     //---------------------------
-    public virtual void Init(Character character)
+    void OnPhotonInstantiate(PhotonMessageInfo info)
     {
-        ownerCharacter = character;
+        object[] data = this.photonView.instantiationData;
+
+        if (data != null && data.Length == 1)
+        {
+            ownerCharacter = (Character)data[0];
+            Init();
+        }
+    }
+
+    public virtual void Init()
+    {
+        this.transform.parent = ownerCharacter.transform;
+        ownerCharacter.abilities.Add(this);
     }
 
     //---------------------------

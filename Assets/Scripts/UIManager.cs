@@ -4,11 +4,9 @@ using UnityEngine;
 
 public class UIManager : MonoBehaviour
 {
-    [Header("Screen")]
     public GameObject Widget_Connecting;
 
-    [Header("Control")]
-    public GameObject Joystick_BasicShoot;
+    GameObject Widget_Joystick_BasicShoot;
 
     //===========================
     //      Functions
@@ -16,6 +14,12 @@ public class UIManager : MonoBehaviour
     //---------------------------
     //      Init Functions
     //---------------------------
+    void Awake()
+    {
+        // Init variable instances
+        Widget_Joystick_BasicShoot = GameObject.Find("Widget_Joystick_BasicShoot");
+    }
+
     void Start()
     {
         // Enable connecting screen
@@ -31,21 +35,14 @@ public class UIManager : MonoBehaviour
     //---------------------------
     //      Control
     //---------------------------
-    // ??
-    public void UpdateBasicAbilityUI(bool hasBall)
+    public void UpdateBasicAbilityUI(PlayerState playerState)
 	{
-        /*
-        EnableJoystickWidget(Joystick_BasicShoot, hasBall);
-		EnableJoystickWidget(Joystick_BasicCatch, !hasBall);
-        */
-	}
+        bool hasBall = ((playerState == PlayerState.HoldingBall) || (playerState == PlayerState.AimingBall));
 
-    // ??
-	void EnableJoystickWidget(GameObject obj, bool enabled)
-	{
-		obj.SetActive(enabled);
-		obj.transform.Find("Joystick").GetComponentInChildren<UIJoyStick>().ResetJoystick();
-	}
+        // Update basic shoot joystick
+        Widget_Joystick_BasicShoot.GetComponentInChildren<UIJoyStick>().ResetJoystick();
+        Widget_Joystick_BasicShoot.SetActive(hasBall);
+    }
 
     //---------------------------
     //      Get Functions

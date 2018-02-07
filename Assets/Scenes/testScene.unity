@@ -719,7 +719,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 700054491}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 460, y: -199, z: 0}
+  m_LocalPosition: {x: 5363, y: 1724, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1337161679}
@@ -1241,7 +1241,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 927984533}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -460, y: -199, z: 0}
+  m_LocalPosition: {x: -5363, y: 1724, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 488062449}
@@ -1898,7 +1898,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Widget_Connecting: {fileID: 235637161}
-  Joystick_BasicShoot: {fileID: 700054491}
 --- !u!114 &1648790033
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1918,7 +1917,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1648790029}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5c1b84a427010e0469ce0df07ab64dbc, type: 3}
+  m_Script: {fileID: 11500000, guid: d10640a025e162d468c5c755b7fad366, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   AutoConnect: 1

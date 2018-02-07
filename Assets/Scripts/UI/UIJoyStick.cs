@@ -105,7 +105,7 @@ public class UIJoyStick : MonoBehaviour
 			if (pressed)
 			{
                 // Project_DB: Callback function while joystick is pressed 
-                OnReleased();
+                OnPressed();
 
 				if (restrictWithinPanel && mPanel == null)
 					FindPanel();

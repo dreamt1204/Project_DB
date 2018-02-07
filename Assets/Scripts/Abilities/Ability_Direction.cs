@@ -24,9 +24,10 @@ public class Ability_Direction : Ability
     //---------------------------
     //      Init Functions
     //---------------------------
-    public override void Init(Character character)
+    public override void Init()
 	{
-        ownerCharacter = character;
+        // ??
+        //ownerCharacter = character;
 
         // Init UI button
         InitJoystick();
@@ -48,10 +49,11 @@ public class Ability_Direction : Ability
     //---------------------------
     void Update()
 	{
-        if (!Character.CheckAuthority(ownerCharacter))
+        // ??
+        /*if (!Character.CheckAuthority(ownerCharacter))
             return;
 
-        UpdateAiming();
+        UpdateAiming();*/
 	}
 
     public virtual void DisplayRangeIndicator(bool active)

@@ -5,11 +5,11 @@ using UnityEngine;
 public enum BallState : byte
 {
     Unpicked,
-	Shooting
+    Shooting
 }
 
 [RequireComponent(typeof(PhotonView))]
-public class Ball : Photon.MonoBehaviour, IPunObservable
+public class Ball : Photon.MonoBehaviour
 {
     //===========================
     //      Variables
@@ -48,6 +48,9 @@ public class Ball : Photon.MonoBehaviour, IPunObservable
 		{
             this.state = value;
 
+            if (this.photonView.isMine)
+                this.photonView.RPC("UpdateBallState", PhotonTargets.Others, this.state);
+
             UpdateMaterial();
         }
 	}
@@ -78,24 +81,6 @@ public class Ball : Photon.MonoBehaviour, IPunObservable
     //---------------------------
     //      Update Functions
     //---------------------------
-    public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
-    {
-        if (stream.isWriting)
-        {
-            stream.SendNext((byte)this.State);
-
-            // ??
-            //stream.SendNext(Character.GetPhotonViewIDFromCharacter(this.ownerCharacter));
-        }
-        else
-        {
-            this.State = (BallState)stream.ReceiveNext();
-
-            // ??
-            //this.ownerCharacter = Character.GetCharacterFromViewID((int)stream.ReceiveNext());
-        }
-    }
-
     void Update()
     {
         // Let only the master client to update the shooting state
@@ -116,7 +101,14 @@ public class Ball : Photon.MonoBehaviour, IPunObservable
 		}
 	}
 
-	// Update ball's material based on status
+    [PunRPC]
+    void UpdateBallState(BallState newState)
+    {
+        if (State != newState)
+            State = newState;
+    }
+
+    // Update ball's material based on status
     void UpdateMaterial()
     {
         MeshRenderer render = gameObject.GetComponent<MeshRenderer>();
