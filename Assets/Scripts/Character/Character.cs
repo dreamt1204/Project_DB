@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum PlayerState
+public enum PlayerState : byte
 {
 	None,
 	HoldingBall,
@@ -87,11 +87,11 @@ public class Character : MonoBehaviour, IPunObservable
 
             // ??
             /*
-            if (isControllable)
-                uiManager.UpdateBasicAbilityUI(status == PlayerState.HoldingBall);
+            if (this.isControllable)
+                this.uiManager.UpdateBasicAbilityUI(status == PlayerState.HoldingBall);
             */
         }
-	}
+    }
     
     //===========================
     //      Functions
@@ -101,71 +101,72 @@ public class Character : MonoBehaviour, IPunObservable
     //---------------------------
     void OnPhotonInstantiate(PhotonMessageInfo info)
     {
-        isControllable = info.sender.IsLocal;
+        this.isControllable = info.sender.IsLocal;
         Init(info.sender);
     }
 
     void Init(PhotonPlayer player)
     {
-        ownerPlayer = player;
+        this.ownerPlayer = player;
 
         // Init instances
         InitInstances();
 
         // Init character name and object name
-        characterName = characterData.characterName;
+        this.characterName = this.characterData.characterName;
         this.gameObject.name = characterName + " (P" + player.ID + ")";
 
         // Init attributes
-        InitAttributes(characterData);
+        InitAttributes(this.characterData);
 
         // Init abilities
-        //InitAbilities(characterData);
+        //InitAbilities(this.characterData);
 
         // Init local character stuff
-        if (isControllable)
+        if (this.isControllable)
         {
             InitUI();
         }
-            
+
         // Set finished init flag
-        isInitialized = true;
+        this.isInitialized = true;
     }
 
     void InitInstances()
     {
-        body = transform.GetComponent<Rigidbody>();
+        this.body = transform.GetComponent<Rigidbody>();
     }
 
     void InitAttributes(CharacterData data)
     {
-        health = data.health;
-        speed = data.speed;
-        power = data.power;
-        defend = data.defend;
+        this.health = data.health;
+        this.speed = data.speed;
+        this.power = data.power;
+        this.defend = data.defend;
 
-        CurrentHealth = health;
+        this.CurrentHealth = health;
     }
 
     void InitAbilities(CharacterData data)
     {
-        abilityPrefabs.Insert(0, PrefabManager.instance.BasicShootPrefab);
+        this.abilityPrefabs.Insert(0, PrefabManager.instance.BasicShootPrefab);
 
-        for (int i = 0; i < abilityPrefabs.Count; i++)
+        for (int i = 0; i < this.abilityPrefabs.Count; i++)
         {
-            Ability newAbility = Instantiate(abilityPrefabs[i]).GetComponent<Ability>();
+            Ability newAbility = Instantiate(this.abilityPrefabs[i]).GetComponent<Ability>();
             newAbility.transform.parent = transform;
-            abilities.Add(newAbility);
+            this.abilities.Add(newAbility);
             newAbility.StartInit(this);
         }
     }
 
     void InitUI()
 	{
-		uiManager = GameObject.Find("GameManagers").GetComponent<UIManager>();
-		movementJoystick = UIManager.GetJoystickObject("Widget_Joystick_Movement").GetComponentInChildren<UIJoyStick_Movement>();
+        // ??
+        this.uiManager = GameObject.Find("GameManagers").GetComponent<UIManager>();
+        this.movementJoystick = UIManager.GetJoystickObject("Widget_Joystick_Movement").GetComponentInChildren<UIJoyStick_Movement>();
 
-		uiManager.UpdateBasicAbilityUI(false);
+        this.uiManager.UpdateBasicAbilityUI(false);
 	}
 
     //---------------------------
@@ -175,7 +176,7 @@ public class Character : MonoBehaviour, IPunObservable
     {
         if (stream.isWriting)
         {
-            stream.SendNext(State);
+            stream.SendNext((byte)State);
         }
         else
         {
@@ -185,10 +186,10 @@ public class Character : MonoBehaviour, IPunObservable
 
     void Update()
 	{
-        if (!isInitialized)
+        if (!this.isInitialized)
             return;
 
-        if (isControllable)
+        if (this.isControllable)
         {
             UpdateMovement();
             UpdateKeyboardMovement();
@@ -233,18 +234,18 @@ public class Character : MonoBehaviour, IPunObservable
 	{
 		float speedFactor = speed * speedMultiplier;
 
-        body.velocity = new Vector3(movementJoystick.joyStickPosX * speedFactor, 0, movementJoystick.joyStickPosY * speedFactor);
+        this.body.velocity = new Vector3(this.movementJoystick.joyStickPosX * speedFactor, 0, this.movementJoystick.joyStickPosY * speedFactor);
 	}
 
 	void UpdateKeyboardMovement()
 	{
-		if (movementJoystick.joyStickPosX != 0)
+		if (this.movementJoystick.joyStickPosX != 0)
 			return;
-		if (movementJoystick.joyStickPosY != 0)
+		if (this.movementJoystick.joyStickPosY != 0)
 			return;
 
 		float speedFactor = speed * speedMultiplier;
-        body.velocity = new Vector3(Input.GetAxis("Horizontal") * speedFactor, 0, Input.GetAxis("Vertical") * speedFactor);
+        this.body.velocity = new Vector3(Input.GetAxis("Horizontal") * speedFactor, 0, Input.GetAxis("Vertical") * speedFactor);
 	}
 
 	//---------------------------
@@ -289,6 +290,8 @@ public class Character : MonoBehaviour, IPunObservable
     //---------------------------
     //      Get Functions
     //---------------------------
+
+    // ??
     public static int GetPhotonViewIDFromCharacter(Character character)
     {
         UTL.TryCatchError(character.gameObject.GetPhotonView() == null, "Cannot find PhotonView for the input character.");

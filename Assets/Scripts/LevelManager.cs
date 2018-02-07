@@ -11,7 +11,7 @@ public class LevelManager : MonoBehaviour
     public Ball startingBall;
 
     // Global variables
-    public static Ball Ball;
+    public static Ball currentBall;
 
     //===========================
     //      Functions
@@ -43,6 +43,6 @@ public class LevelManager : MonoBehaviour
     void SpawnStartingBall()
     {
         Vector3 spawnPos = GameObject.Find("SpawnPoint_Ball").transform.position;
-        PhotonNetwork.Instantiate(startingBall.name, spawnPos, Quaternion.identity, 0);
+        currentBall = Ball.SpawnBall(this.startingBall, spawnPos, BallState.Unpicked);
     }
 }

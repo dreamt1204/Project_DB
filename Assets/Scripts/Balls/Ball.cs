@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum BallState
+public enum BallState : byte
 {
-	Unpicked,
+    Unpicked,
 	Picked,
 	Shooting
 }
@@ -42,23 +42,14 @@ public class Ball : Photon.MonoBehaviour, IPunObservable
 	{
 		get
 		{ 
-			return state;
+			return this.state;
 		}
 
 		set
 		{
-            state = value;
+            this.state = value;
 
             UpdateMaterial();
-
-
-
-            // ??
-            UpdateBallVisibility();
-
-            // ??
-            UpdatePhysics();
-            
         }
 	}
 
@@ -68,11 +59,22 @@ public class Ball : Photon.MonoBehaviour, IPunObservable
     //---------------------------
     //      Init Functions
     //---------------------------
-    void Start()
+    void Awake()
 	{
-		body = GetComponent<Rigidbody>();
-        state = BallState.Unpicked;
-	}
+        this.body = GetComponent<Rigidbody>();
+    }
+
+    void OnPhotonInstantiate(PhotonMessageInfo info)
+    {
+        // Init Ball State
+        object[] data = this.photonView.instantiationData;
+
+        if (data != null && data.Length == 1)
+        {
+            this.State = (BallState)data[0];
+            UpdateMaterial();
+        }
+    }
 
     //---------------------------
     //      Update Functions
@@ -81,96 +83,98 @@ public class Ball : Photon.MonoBehaviour, IPunObservable
     {
         if (stream.isWriting)
         {
-            stream.SendNext(State);
-            stream.SendNext(Character.GetPhotonViewIDFromCharacter(ownerCharacter));
+            stream.SendNext((byte)this.State);
+
+            // ??
+            //stream.SendNext(Character.GetPhotonViewIDFromCharacter(this.ownerCharacter));
         }
         else
         {
-            State = (BallState)stream.ReceiveNext();
-            ownerCharacter = Character.GetCharacterFromViewID((int)stream.ReceiveNext());
+            this.State = (BallState)stream.ReceiveNext();
+
+            // ??
+            //this.ownerCharacter = Character.GetCharacterFromViewID((int)stream.ReceiveNext());
         }
     }
 
     void Update()
     {
-        UpdateShootingBallStatus();
+        // Let only the master client to update the shooting state
+        if (PhotonNetwork.isMasterClient)
+            UpdateShootingBallState();
     }
 
     // Reset ball status to Unpicked if ball's velocity is lower than safe speed
-    void UpdateShootingBallStatus()
+    void UpdateShootingBallState()
 	{
-		if (State != BallState.Shooting)
+		if (this.State != BallState.Shooting)
 			return;
 
-		float currentBallSpeed = gameObject.GetComponent<Rigidbody>().velocity.magnitude;
+		float currentBallSpeed = this.body.velocity.magnitude;
 		if (Mathf.Floor(currentBallSpeed) <= safeSpeed)
 		{
-            State = BallState.Unpicked;
+            this.State = BallState.Unpicked;
 		}
 	}
-
-    // Update ball visiblity based on ball state
-    void UpdateBallVisibility()
-    {
-        this.gameObject.SetActive(State != BallState.Picked);
-    }
 
 	// Update ball's material based on status
     void UpdateMaterial()
     {
         MeshRenderer render = gameObject.GetComponent<MeshRenderer>();
 
-        if (State == BallState.Shooting)
+        if (this.State == BallState.Shooting)
 			render.material = MaterialDamage;
         else
 			render.material = MaterialSafe;
     }
 
-	// Update ball's physics based on status
-    void UpdatePhysics()
+    //---------------------------
+    //      Collision events
+    //---------------------------
+    void OnCollisionEnter(Collision col)
     {
-		if (State == BallState.Picked)
-			EnablePhysics(false);
-		else
-			EnablePhysics(true);
-    }
+        Character collider_char = col.gameObject.GetComponent<Character>();
+        PhotonView collider_pv = col.gameObject.GetComponent<PhotonView>();
 
-	// Enable / Disable ball rigidbody
-	void EnablePhysics(bool enabled)
-	{
-		Rigidbody rb = gameObject.GetComponent<Rigidbody>();
-		rb.detectCollisions = enabled;
-		rb.isKinematic = !enabled;
-	}
+        if (collider_char != null && collider_pv != null && collider_pv.isMine)
+        {
+            if (this.State == BallState.Unpicked)
+                PickUp(collider_char);
+
+            // ??
+            /*
+            else if (this.State == BallState.Shooting)
+                ActionAbility.BallHitAction(col, this, collider_char);
+            */
+        }
+    }
 
     //---------------------------
     //      Ball status action
     //---------------------------
-    public void TryPickUp(Character target)
+    void PickUp(Character target)
     {
         if (target.State != PlayerState.None)
             return;
 
-        if (sentPickup)
-            return;
+        // Set state for the ball holder character
+        target.State = PlayerState.HoldingBall;
 
-        sentPickup = true;
-
-        this.photonView.RPC("PickUp", PhotonTargets.AllViaServer, Character.GetPhotonViewIDFromCharacter(target));
+        // Hide the gameObject and call the onwer client to destroy it
+        this.gameObject.SetActive(false);
+        this.photonView.RPC("PickUp_RPC_owner", this.photonView.owner);
     }
 
     [PunRPC]
-    void PickUp(int BallHolderViewID)
+    void PickUp_RPC_owner()
     {
-        State = BallState.Picked;
-        ownerCharacter = Character.GetCharacterFromViewID(BallHolderViewID);
-
-        ownerCharacter.State = PlayerState.HoldingBall;
-        AttackerTeam = ownerCharacter.ownerPlayer.GetTeam();
-
-        sentPickup = false;
+        this.State = BallState.Picked;
+        PhotonNetwork.Destroy(this.gameObject);
     }
-    
+
+
+    // ??
+    /*
     public void TryShot()
     {
         this.photonView.RPC("Shot", PhotonTargets.AllViaServer);
@@ -179,27 +183,33 @@ public class Ball : Photon.MonoBehaviour, IPunObservable
     [PunRPC]
     void Shot()
     {
-        State = BallState.Shooting;
+        this.State = BallState.Shooting;
 
-        ownerCharacter = null;
+        this.ownerCharacter = null;
         //ActionAbility = shootAbility;
         transform.parent = null;
     }
+    */
 
+    //===========================
+    //      Static Functions
+    //===========================
     //---------------------------
-    //      Collision events
+    //      Spawn
     //---------------------------
-    void OnCollisionEnter (Collision col)
-	{
-        Character collider_char = col.gameObject.GetComponent<Character>();
-        PhotonView collider_pv = col.gameObject.GetComponent<PhotonView>();
-        
-        if (collider_char != null && collider_pv != null && collider_pv.isMine)
-        {
-            if (State == BallState.Unpicked)
-                TryPickUp(collider_char);
-            else if (State == BallState.Shooting)
-                ActionAbility.BallHitAction(col, this, collider_char);
-        }
+    public static Ball SpawnBall(Ball ballPrefab, Vector3 spawnPos)
+    {
+        object[] data = new object[1];
+        data[0] = BallState.Unpicked;
+
+        return PhotonNetwork.Instantiate(ballPrefab.name, spawnPos, Quaternion.identity, 0, data).GetComponent<Ball>();
+    }
+
+    public static Ball SpawnBall(Ball ballPrefab, Vector3 spawnPos, BallState startingState)
+    {
+        object[] data = new object[1];
+        data[0] = startingState;
+
+        return PhotonNetwork.Instantiate(ballPrefab.name, spawnPos, Quaternion.identity, 0, data).GetComponent<Ball>();
     }
 }

@@ -837,11 +837,23 @@ Prefab:
       propertyPath: m_RootOrder
       value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 4455846608764642, guid: 0c53152e7cb15449ebb298c0885d5212, type: 2}
-      propertyPath: m_LocalPosition.x
-      value: -460
+    - target: {fileID: 4654531536839508, guid: 0c53152e7cb15449ebb298c0885d5212, type: 2}
+      propertyPath: m_LocalScale.x
+      value: 0.0027777778
+      objectReference: {fileID: 0}
+    - target: {fileID: 4654531536839508, guid: 0c53152e7cb15449ebb298c0885d5212, type: 2}
+      propertyPath: m_LocalScale.y
+      value: 0.0027777778
+      objectReference: {fileID: 0}
+    - target: {fileID: 4654531536839508, guid: 0c53152e7cb15449ebb298c0885d5212, type: 2}
+      propertyPath: m_LocalScale.z
+      value: 0.0027777778
       objectReference: {fileID: 0}
     - target: {fileID: 4455846608764642, guid: 0c53152e7cb15449ebb298c0885d5212, type: 2}
+      propertyPath: m_LocalPosition.y
+      value: -199
+      objectReference: {fileID: 0}
+    - target: {fileID: 4296418738665258, guid: 0c53152e7cb15449ebb298c0885d5212, type: 2}
       propertyPath: m_LocalPosition.y
       value: -199
       objectReference: {fileID: 0}
@@ -849,9 +861,9 @@ Prefab:
       propertyPath: m_LocalPosition.x
       value: 460
       objectReference: {fileID: 0}
-    - target: {fileID: 4296418738665258, guid: 0c53152e7cb15449ebb298c0885d5212, type: 2}
-      propertyPath: m_LocalPosition.y
-      value: -199
+    - target: {fileID: 4455846608764642, guid: 0c53152e7cb15449ebb298c0885d5212, type: 2}
+      propertyPath: m_LocalPosition.x
+      value: -460
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 0c53152e7cb15449ebb298c0885d5212, type: 2}
@@ -1071,6 +1083,7 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 1648790031}
+  - component: {fileID: 1648790036}
   - component: {fileID: 1648790034}
   - component: {fileID: 1648790030}
   - component: {fileID: 1648790033}
@@ -1161,6 +1174,18 @@ MonoBehaviour:
   - {fileID: 114604622264814306, guid: 20eaea63658e5f148958c366cc105f93, type: 2}
   BasicShootPrefab: {fileID: 114775826133262592, guid: 4d0f6dcd5373f453fbd5aa79f6f09bfe,
     type: 2}
+--- !u!114 &1648790036
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1648790029}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a6714fb34a4b4ae4cb3576ad3fed7d46, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isDebugging: 1
 --- !u!1 &1686577854
 GameObject:
   m_ObjectHideFlags: 0

@@ -44,4 +44,5 @@ MonoBehaviour:
   - TaggedPlayer
   - PickUp
   - Shot
+  - PickUp_RPC_owner
   DisableAutoOpenWizard: 1

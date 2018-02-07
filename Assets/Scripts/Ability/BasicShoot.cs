@@ -34,6 +34,8 @@ public class BasicShoot : Ability_Direction
     //---------------------------
     public override void ActivateAbility()
 	{
+        // ??
+        /*
         LevelManager.Ball.transform.position = BallPosition_Shoot.position;
 
         // Update ball status
@@ -46,6 +48,7 @@ public class BasicShoot : Ability_Direction
         LevelManager.Ball.GetComponent<Rigidbody>().velocity = new Vector3(AimingVector.x * startSpeed, 0, AimingVector.z * startSpeed);
 
         ownerCharacter.State = PlayerState.None;
+        */
     }
 
     public override void BallHitAction(Collision col, Ball ball, Character hitCharacter)

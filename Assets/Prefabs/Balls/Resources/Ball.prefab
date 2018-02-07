@@ -123,6 +123,7 @@ MonoBehaviour:
   ObservedComponents:
   - {fileID: 114992555771768740}
   - {fileID: 114847589812649756}
+  - {fileID: 114850430433781942}
   ObservedComponentsFoldoutOpen: 1
   viewIdField: 0
   instantiationId: -1
@@ -156,7 +157,7 @@ MonoBehaviour:
   MaterialDamage: {fileID: 2100000, guid: f8b224bc0008d49f599fed4f977df346, type: 2}
   sentPickup: 0
   ownerCharacter: {fileID: 0}
-  rb: {fileID: 0}
+  body: {fileID: 0}
   ActionAbility: {fileID: 0}
   AttackerTeam: 255
 --- !u!114 &114992555771768740
