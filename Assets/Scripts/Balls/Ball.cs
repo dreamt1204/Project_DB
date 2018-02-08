@@ -23,13 +23,10 @@ public class Ball : Photon.MonoBehaviour
     [HideInInspector] public bool sentPickup;
 
     // Variables
-    [HideInInspector] public Character ownerCharacter;
 	[HideInInspector] public Rigidbody body;
     BallState state;
-
-    // ??
-    [HideInInspector] public Ability_Direction ActionAbility;
-    [HideInInspector] public Team AttackerTeam = Team.None;
+    Character attacker;    // The character shoots this ball
+    Vector3 startingVector;    // The starting vector direction of the shooting ball
 
     // Const Variables
 	const float safeSpeed = 5f;
@@ -68,13 +65,35 @@ public class Ball : Photon.MonoBehaviour
 
     void OnPhotonInstantiate(PhotonMessageInfo info)
     {
-        // Init Ball State
         object[] data = this.photonView.instantiationData;
 
-        if (data != null && data.Length == 1)
+        if (data != null)
         {
-            this.State = (BallState)data[0];
-            UpdateMaterial();
+            for (int i = 0; i < data.Length; i++)
+            {
+                // Get starting state
+                if (i == 0)
+                {
+                    this.State = (BallState)data[0];
+                    UpdateMaterial();
+                }
+                // Get attacker
+                else if (i == 1)
+                {
+                    this.attacker = (Character)data[1];
+                }
+                // Get attacker
+                else if (i == 2)
+                {
+                    this.startingVector = (Vector3)data[2];
+                }
+            }
+        }
+
+        // Start the ball as projectile if it meets the following requirements
+        if ((State == BallState.Shooting) && (attacker != null) && (this.attacker.isControllable))
+        {
+            Shoot();
         }
     }
 
@@ -84,7 +103,7 @@ public class Ball : Photon.MonoBehaviour
     void Update()
     {
         // Let only the master client to update the shooting state
-        if (PhotonNetwork.isMasterClient)
+        if (this.photonView.isMine)
             UpdateShootingBallState();
     }
 
@@ -131,25 +150,19 @@ public class Ball : Photon.MonoBehaviour
         {
             if (this.State == BallState.Unpicked)
                 PickUp(collider_char);
-
-            // ??
-            /*
-            else if (this.State == BallState.Shooting)
-                ActionAbility.BallHitAction(col, this, collider_char);
-            */
         }
     }
 
     //---------------------------
     //      Ball state action
     //---------------------------
-    void PickUp(Character target)
+    void PickUp(Character character)
     {
-        if (target.State != PlayerState.None)
+        if (character.State != PlayerState.None)
             return;
 
         // Set state for the ball holder character
-        target.State = PlayerState.HoldingBall;
+        character.State = PlayerState.HoldingBall;
 
         // Hide the gameObject and call the onwer client to destroy it
         this.gameObject.SetActive(false);
@@ -163,24 +176,23 @@ public class Ball : Photon.MonoBehaviour
         PhotonNetwork.Destroy(this.gameObject);
     }
 
-
-    // ??
-    /*
-    public void TryShot()
+    void Shoot()
     {
-        this.photonView.RPC("Shot", PhotonTargets.AllViaServer);
+        // Give ball a force to fly
+        float startingSpeed = GetBallStartSpeed();
+        body.velocity = new Vector3(this.startingVector.x * startingSpeed, 0, this.startingVector.z * startingSpeed);
     }
 
-    [PunRPC]
-    void Shot()
+    //---------------------------
+    //      Calculation
+    //---------------------------
+    public virtual float GetBallStartSpeed()
     {
-        this.State = BallState.Shooting;
+        float ballSpeedMultiplier = 0.35f;
 
-        this.ownerCharacter = null;
-        //ActionAbility = shootAbility;
-        transform.parent = null;
+        return attacker.power * ballSpeedMultiplier;
     }
-    */
+
 
     //===========================
     //      Static Functions
@@ -200,6 +212,16 @@ public class Ball : Photon.MonoBehaviour
     {
         object[] data = new object[1];
         data[0] = startingState;
+
+        return PhotonNetwork.Instantiate(ballPrefab.name, spawnPos, Quaternion.identity, 0, data).GetComponent<Ball>();
+    }
+
+    public static Ball SpawnShootingBall(Ball ballPrefab, Vector3 spawnPos, Character attacker, Vector3 aimingVector)
+    {
+        object[] data = new object[3];
+        data[0] = BallState.Shooting;
+        data[1] = attacker;
+        data[2] = aimingVector;
 
         return PhotonNetwork.Instantiate(ballPrefab.name, spawnPos, Quaternion.identity, 0, data).GetComponent<Ball>();
     }

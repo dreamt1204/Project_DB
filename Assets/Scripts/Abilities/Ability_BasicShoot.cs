@@ -7,16 +7,17 @@ public class Ability_BasicShoot : Ability
     //===========================
     //      Variables
     //===========================
-    // Prefabs
-    public GameObject RangeIndicatorPrefab;
+    [Header("Prefabs")]
+    public Ball ballPrefab;
+    public GameObject rangeIndicatorPrefab;
 
     // Variables
-    GameObject RangeIndicator;
-    Vector3 AimingVector;
+    GameObject rangeIndicator;
+    Vector3 aimingVector;
 
     // UI elements
     UIJoyStick joystick;
-    bool AimingJoystick = false;
+    bool isAimingJoystick = false;
 
     //===========================
     //      Functions
@@ -24,9 +25,9 @@ public class Ability_BasicShoot : Ability
     //---------------------------
     //      Init Functions
     //---------------------------
-    public override void Init()
+    public override void Init(Character character)
     {
-        base.Init();
+        base.Init(character);
 
         // Initialization done by owner player
         if (ownerCharacter.isControllable)
@@ -47,8 +48,8 @@ public class Ability_BasicShoot : Ability
 
     void InitRangeIndicator()
     {
-        RangeIndicator = Instantiate(RangeIndicatorPrefab, ownerCharacter.transform.position, Quaternion.identity);
-        RangeIndicator.transform.parent = this.transform;
+        rangeIndicator = Instantiate(rangeIndicatorPrefab, ownerCharacter.transform.position, Quaternion.identity);
+        rangeIndicator.transform.parent = this.transform;
     }
 
     //---------------------------
@@ -58,7 +59,7 @@ public class Ability_BasicShoot : Ability
     {
         if (ownerCharacter.isControllable)
         {
-            if ((joystick != null) && (RangeIndicator != null))
+            if ((joystick != null) && (rangeIndicator != null))
             {
                 UpdateAiming();
             }
@@ -67,14 +68,14 @@ public class Ability_BasicShoot : Ability
 
     void UpdateAiming()
     {
-        if (RangeIndicator.GetActive() != AimingJoystick)
-            RangeIndicator.SetActive(AimingJoystick);
+        if (rangeIndicator.GetActive() != isAimingJoystick)
+            rangeIndicator.SetActive(isAimingJoystick);
 
-        if (AimingJoystick)
+        if (isAimingJoystick)
         {
             float rotation = Mathf.Atan2(joystick.joyStickPosX, joystick.joyStickPosY) * 180 / Mathf.PI;
-            RangeIndicator.transform.rotation = Quaternion.Euler(0, rotation, 0);
-            AimingVector = new Vector3(joystick.joyStickPosX, 0, joystick.joyStickPosY).normalized;
+            rangeIndicator.transform.rotation = Quaternion.Euler(0, rotation, 0);
+            aimingVector = new Vector3(joystick.joyStickPosX, 0, joystick.joyStickPosY).normalized;
         }
     }
 
@@ -89,6 +90,7 @@ public class Ability_BasicShoot : Ability
     void OnJoystickReleased()
     {
         AimingShot(false);
+        ActivateAbility();
     }
 
     //---------------------------
@@ -96,7 +98,7 @@ public class Ability_BasicShoot : Ability
     //---------------------------
     void AimingShot(bool isAiming)
     {
-        AimingJoystick = isAiming;
+        isAimingJoystick = isAiming;
 
         if (isAiming)
         {
@@ -107,5 +109,25 @@ public class Ability_BasicShoot : Ability
             ownerCharacter.State = PlayerState.None;
             joystick.ResetJoystick();
         }
+    }
+
+    public override void ActivateAbility()
+    {
+        Vector3 shootingPos = ownerCharacter.shootingPositionTransform.position;
+        Ball.SpawnShootingBall(ballPrefab, shootingPos, ownerCharacter, aimingVector);
+    }
+
+    //---------------------------
+    //      Calculation
+    //---------------------------
+    public virtual float GetBallStartSpeed()
+    {
+        float ballSpeedMultiplier = 0.35f;
+        return ownerCharacter.power * ballSpeedMultiplier;
+    }
+
+    public virtual float GetBallDamage(Ball ball)
+    {
+        return Mathf.Floor(ball.body.velocity.magnitude);
     }
 }

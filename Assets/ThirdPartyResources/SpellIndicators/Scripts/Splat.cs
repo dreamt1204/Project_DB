@@ -108,13 +108,13 @@ namespace Werewolf.SpellIndicators {
     /// </summary>
     /// <param name="type">The type of Splat you want to show.</param>
     public void Select() {
-      if (this != Manager.RangeIndicator) {
+      if (this != Manager.rangeIndicator) {
         Manager.Splats.ToList().ForEach(x => x.SetVisible(x == this));
         Manager.CurrentSplat = this;
         UpdateRangeIndicatorSize();
 
         if (Manager != null)
-          Manager.RangeIndicator.SetVisible(showRangeIndicator);
+          Manager.rangeIndicator.SetVisible(showRangeIndicator);
       }
     }
 
@@ -222,7 +222,7 @@ namespace Werewolf.SpellIndicators {
     /// Scale indicator to be same as Range
     /// </summary>
     private void UpdateRangeIndicatorSize() {
-      Manager.RangeIndicator.Scale = Range * 2.1f;
+      Manager.rangeIndicator.Scale = Range * 2.1f;
     }
 
     /// <summary>

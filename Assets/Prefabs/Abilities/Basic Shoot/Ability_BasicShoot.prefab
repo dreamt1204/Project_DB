@@ -20,7 +20,6 @@ GameObject:
   m_Component:
   - component: {fileID: 4461615092745688}
   - component: {fileID: 114910732005346228}
-  - component: {fileID: 114308623091449706}
   m_Layer: 0
   m_Name: Ability_BasicShoot
   m_TagString: Untagged
@@ -41,32 +40,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &114308623091449706
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1578108875285634}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa584fbee541324448dd18d8409c7a41, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ownerId: 0
-  group: 0
-  OwnerShipWasTransfered: 0
-  prefixBackup: -1
-  synchronization: 3
-  onSerializeTransformOption: 3
-  onSerializeRigidBodyOption: 2
-  ownershipTransfer: 0
-  ObservedComponents:
-  - {fileID: 4461615092745688}
-  ObservedComponentsFoldoutOpen: 1
-  viewIdField: 0
-  instantiationId: -1
-  currentMasterID: -1
-  isRuntimeInstantiated: 0
 --- !u!114 &114910732005346228
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -80,5 +53,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ownerCharacter: {fileID: 0}
   abilityName: Basic Shoot
-  RangeIndicatorPrefab: {fileID: 1053441901937844, guid: 393130713424945718a63429e33abd29,
+  ballPrefab: {fileID: 114850430433781942, guid: 9b5e6247cab53254b827d9a33d1089f0,
+    type: 2}
+  rangeIndicatorPrefab: {fileID: 1053441901937844, guid: 393130713424945718a63429e33abd29,
     type: 2}

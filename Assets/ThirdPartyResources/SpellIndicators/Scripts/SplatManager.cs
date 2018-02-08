@@ -10,7 +10,7 @@ namespace Werewolf.SpellIndicators {
     /// <summary>
     /// Special indicator for displaying range, unselectable
     /// </summary>
-    public Splat RangeIndicator;
+    public Splat rangeIndicator;
 
     /// <summary>
     /// All splat types go here, any changes should be mirrored in the initializer below.
@@ -56,7 +56,7 @@ namespace Werewolf.SpellIndicators {
     public void Cancel() {
       if (CurrentSplat != null) {
         CurrentSplat.SetVisible(false);
-        RangeIndicator.SetVisible(false);
+        rangeIndicator.SetVisible(false);
       }
     }
   }

@@ -27,6 +27,7 @@ public class Character : Photon.MonoBehaviour
     [HideInInspector] public PhotonPlayer ownerPlayer;
     PlayerState state;
     Rigidbody body;
+    [HideInInspector] public Transform shootingPositionTransform;
 
     // Information
     [Header("Information")]
@@ -118,12 +119,12 @@ public class Character : Photon.MonoBehaviour
         // Init attributes
         InitAttributes(this.characterData);
 
+        // Init abilities
+        InitAbilities(this.characterData);
+
         // Initialization done by owner player
         if (this.isControllable)
         {
-            // Init abilities
-            InitAbilities(this.characterData);
-
             // Init UI elements
             InitUI();
         }
@@ -135,6 +136,7 @@ public class Character : Photon.MonoBehaviour
     void InitInstances()
     {
         this.body = transform.GetComponent<Rigidbody>();
+        this.shootingPositionTransform = this.transform.Find("ShootingPosition");
     }
 
     void InitAttributes(CharacterData data)
@@ -159,12 +161,13 @@ public class Character : Photon.MonoBehaviour
                 this.abilityPrefabs.Add(ability);
         }
 
-        // Instantiate abilities over network
+        // Instantiate abilities
         for (int i = 0; i < this.abilityPrefabs.Count; i++)
         {
-            object[] instantiationData = new object[1];
-            instantiationData[0] = this;
-            Ability newAbility = PhotonNetwork.Instantiate(this.abilityPrefabs[i].name, this.transform.position, Quaternion.identity, 0, instantiationData).GetComponent<Ability>();
+            Ability newAbility = Instantiate(this.abilityPrefabs[i], this.transform.position, Quaternion.identity).GetComponent<Ability>();
+            this.abilities.Add(newAbility);
+            newAbility.transform.parent = this.transform;
+            newAbility.Init(this);
         }
     }
 
