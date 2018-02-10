@@ -122,12 +122,8 @@ public class Character : Photon.MonoBehaviour
         // Init abilities
         InitAbilities(this.characterData);
 
-        // Initialization done by owner player
-        if (this.isControllable)
-        {
-            // Init UI elements
-            InitUI();
-        }
+        // Init UI elements
+        InitUI();
 
         // Set finished init flag
         this.isInited = true;
@@ -173,11 +169,22 @@ public class Character : Photon.MonoBehaviour
 
     void InitUI()
 	{
+        if (this.isControllable)
+            InitUI_LocalPlayer();
+
+        // Health Bar
+        UIWidget Widget_HealthBar = Instantiate(PrefabManager.instance.HealthBarPrefab.gameObject).GetComponent<UIWidget>();
+        Widget_HealthBar.SetAnchor(this.transform.Find("HealthBarPosition"));
+        Widget_HealthBar.GetComponent<UIHealthBar>().Init(this);
+    }
+
+    void InitUI_LocalPlayer()
+    {
         this.uiManager = GameObject.Find("GameManagers").GetComponent<UIManager>();
 
         this.joystickMovement = UIManager.GetJoystick("Widget_Joystick_Movement");
         this.uiManager.UpdateBasicAbilityUI(State);
-	}
+    }
 
     //---------------------------
     //      Update Functions

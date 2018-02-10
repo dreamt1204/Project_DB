@@ -13,6 +13,9 @@ public class PrefabManager : MonoBehaviour
     [Header("Characters")]
     public List<Character> CharacterPrefabs;
 
+    [Header("UI Elements")]
+    public UIWidget HealthBarPrefab;
+
     [Header("Basic Abilities")]
     public Ability BasicShootPrefab;
 

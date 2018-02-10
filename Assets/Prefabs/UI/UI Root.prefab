@@ -169,7 +169,7 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 4000251717298932}
-  - component: {fileID: 114620442020776874}
+  - component: {fileID: 114662568030291542}
   - component: {fileID: 114293140222133968}
   - component: {fileID: 135218975351427996}
   m_Layer: 5
@@ -312,7 +312,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1796545161934446}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 460, y: -199, z: 0}
+  m_LocalPosition: {x: 5363, y: 1724, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4052738462754284}
@@ -327,7 +327,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1642171482858702}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -460, y: -199, z: 0}
+  m_LocalPosition: {x: -5363, y: 1724, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4000251717298932}
@@ -784,25 +784,6 @@ MonoBehaviour:
   hideIfOffScreen: 0
   keepAspectRatio: 1
   aspectRatio: 1
---- !u!114 &114620442020776874
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1831980919400350}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 26dedcaea36ee4711b073d8a3c9b8654, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  joyStickPosX: 0
-  joyStickPosY: 0
-  target: {fileID: 4000251717298932}
-  scrollWheelFactor: 0
-  restrictWithinPanel: 0
-  ClampRadius: 100
-  strength: 10
-  ignoreTimeScale: 0
 --- !u!114 &114647415035910328
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -857,6 +838,26 @@ MonoBehaviour:
   mAtlas: {fileID: 114641703322513168, guid: 5c1960d63080c4bc9afaa7e1800be9dc, type: 2}
   mSpriteName: Rectangle
   mFillCenter: 1
+--- !u!114 &114662568030291542
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1831980919400350}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9d00418d2a2af4b109e18c85e0ffcd30, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  listenerObject: {fileID: 0}
+  joyStickPosX: 0
+  joyStickPosY: 0
+  target: {fileID: 4000251717298932}
+  scrollWheelFactor: 0
+  restrictWithinPanel: 0
+  ClampRadius: 100
+  strength: 10
+  ignoreTimeScale: 0
 --- !u!114 &114696334989730782
 MonoBehaviour:
   m_ObjectHideFlags: 1

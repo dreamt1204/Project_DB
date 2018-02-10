@@ -130,4 +130,14 @@ public static class TeamUTL
         else
             player.SetTeam(Team.Red);
     }
+
+    public static bool IsTeamMate(this PhotonPlayer player, PhotonPlayer target)
+    {
+        return (player.GetTeam() == target.GetTeam());
+    }
+
+    public static bool IsCharacterTeamMate(Character target)
+    {
+        return true; // IsTeamMate(target.ownerPlayer);        
+    }
 }
