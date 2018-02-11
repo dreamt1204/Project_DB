@@ -17,8 +17,11 @@ public class UIHealthBar : MonoBehaviour
     public void Init(Character character)
     {
         ownerCharacter = character;
-        progressBar = GetComponent<UIProgressBar>();
 
+		gameObject.name = "Widget_HealthBar (" + ownerCharacter.gameObject.name + ")";
+		GetComponent<UIFollowTarget>().target = ownerCharacter.transforms.Find("HealthBarPosition");
+
+		progressBar = GetComponent<UIProgressBar>();
         UpdateHealthBarColor();
     }
 
@@ -28,14 +31,21 @@ public class UIHealthBar : MonoBehaviour
         progressBar.value = healthPercentage;
     }
 
+	// Set health bar color based on character owner and team condition
     void UpdateHealthBarColor()
     {
         UISprite barSprite = transform.Find("Sprite_Bar").GetComponent<UISprite>();
 
-        barSprite.spriteName = "Progress-Bar-Green";
-
-        barSprite.spriteName = "Progress-Bar-Blue";
-
-        barSprite.spriteName = "Progress-Bar-PinkDark";
+		if (ownerCharacter.isControllable)
+		{
+			barSprite.spriteName = "Progress-Bar-Green";
+		}
+		else
+		{
+			if (TeamUTL.IsCharacterMyTeamMate(ownerCharacter))
+				barSprite.spriteName = "Progress-Bar-Blue";
+			else
+				barSprite.spriteName = "Progress-Bar-PinkDark";
+		}
     }
 }

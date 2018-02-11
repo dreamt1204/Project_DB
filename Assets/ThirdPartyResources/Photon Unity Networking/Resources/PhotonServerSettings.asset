@@ -47,4 +47,5 @@ MonoBehaviour:
   - PickUp_RPC_owner
   - UpdateBallState
   - UpdatePlayerState
+  - RecieveDamage_RPC
   DisableAutoOpenWizard: 1

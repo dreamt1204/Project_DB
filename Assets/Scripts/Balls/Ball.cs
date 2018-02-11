@@ -9,7 +9,7 @@ public enum BallState : byte
 }
 
 [RequireComponent(typeof(PhotonView))]
-public class Ball : Photon.MonoBehaviour
+public class Ball : Photon.MonoBehaviour, IPunObservable
 {
     //===========================
     //      Variables
@@ -100,7 +100,19 @@ public class Ball : Photon.MonoBehaviour
     //---------------------------
     //      Update Functions
     //---------------------------
-    void Update()
+	public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+	{
+		if(stream.isWriting)
+		{
+			stream.SendNext(this.State);
+		}
+		else
+		{
+			this.State = (BallState)stream.ReceiveNext();
+		}
+	}
+
+	void Update()
     {
         // Let only the master client to update the shooting state
         if (this.photonView.isMine)
@@ -143,19 +155,21 @@ public class Ball : Photon.MonoBehaviour
     //---------------------------
     void OnCollisionEnter(Collision col)
     {
-        Character collider_char = col.gameObject.GetComponent<Character>();
-        PhotonView collider_pv = col.gameObject.GetComponent<PhotonView>();
+		Character collider_char = col.gameObject.GetComponent<Character>();
 
-        if (collider_char != null && collider_pv != null && collider_pv.isMine)
+		if (collider_char != null && collider_char.isControllable)
         {
-            if (this.State == BallState.Unpicked)
+			if (this.State == BallState.Unpicked)
                 PickUp(collider_char);
+			else if (this.State == BallState.Shooting)
+				Hit(collider_char);
         }
     }
 
     //---------------------------
-    //      Ball state action
+    //      Pick Up
     //---------------------------
+	// Called on the colliding picker
     void PickUp(Character character)
     {
         if (character.State != PlayerState.None)
@@ -169,6 +183,7 @@ public class Ball : Photon.MonoBehaviour
         this.photonView.RPC("PickUp_RPC_owner", this.photonView.owner);
     }
 
+	// Called on the original ball owner/attacker
     [PunRPC]
     void PickUp_RPC_owner()
     {
@@ -176,12 +191,24 @@ public class Ball : Photon.MonoBehaviour
         PhotonNetwork.Destroy(this.gameObject);
     }
 
+	//---------------------------
+	//      Shoot
+	//---------------------------
     void Shoot()
     {
         // Give ball a force to fly
         float startingSpeed = GetBallStartSpeed();
         body.velocity = new Vector3(this.startingVector.x * startingSpeed, 0, this.startingVector.z * startingSpeed);
     }
+
+	//---------------------------
+	//      Hit
+	//---------------------------
+	// Called on the colliding character
+	public virtual void Hit(Character character)
+	{
+		character.RecieveDamage(GetBallDamage());
+	}
 
     //---------------------------
     //      Calculation
@@ -192,6 +219,13 @@ public class Ball : Photon.MonoBehaviour
 
         return attacker.power * ballSpeedMultiplier;
     }
+
+	public virtual float GetBallDamage()
+	{
+		float ballDamageMultiplier = 0.5f;
+
+		return attacker.power * ballDamageMultiplier;
+	}
 
 
     //===========================

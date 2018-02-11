@@ -12,7 +12,7 @@ public enum PlayerState : byte
 }
 
 [RequireComponent(typeof(PhotonView))]
-public class Character : Photon.MonoBehaviour
+public class Character : Photon.MonoBehaviour, IPunObservable
 {
     //===========================
     //      Variables
@@ -27,6 +27,8 @@ public class Character : Photon.MonoBehaviour
     [HideInInspector] public PhotonPlayer ownerPlayer;
     PlayerState state;
     Rigidbody body;
+	[HideInInspector] public Transform transforms;
+	[HideInInspector] public Transform shootingParentTransform;
     [HideInInspector] public Transform shootingPositionTransform;
 
     // Information
@@ -53,6 +55,8 @@ public class Character : Photon.MonoBehaviour
 	// UI elements
 	UIManager uiManager;
 	UIJoyStick joystickMovement;
+	UIHealthBar healthBar;
+	UIDamageText damageText;
 
 
     //---------------------------
@@ -81,13 +85,7 @@ public class Character : Photon.MonoBehaviour
             state = value;
 
             if (this.photonView.isMine)
-            {
-                // Synce State over network
-                this.photonView.RPC("UpdatePlayerState", PhotonTargets.Others, this.state);
-
-                // Update basic ability UI
-                this.uiManager.UpdateBasicAbilityUI(this.state);
-            }
+				this.uiManager.UpdateBasicAbilityUI(this.state);
 
             UpdatePlayerAnimation();                
         }
@@ -132,7 +130,9 @@ public class Character : Photon.MonoBehaviour
     void InitInstances()
     {
         this.body = transform.GetComponent<Rigidbody>();
-        this.shootingPositionTransform = this.transform.Find("ShootingPosition");
+		this.transforms = this.transform.Find("Transforms");
+		this.shootingParentTransform = this.transforms.Find("ShootingParent");
+		this.shootingPositionTransform = this.shootingParentTransform.Find("ShootingPosition");
     }
 
     void InitAttributes(CharacterData data)
@@ -173,9 +173,12 @@ public class Character : Photon.MonoBehaviour
             InitUI_LocalPlayer();
 
         // Health Bar
-        UIWidget Widget_HealthBar = Instantiate(PrefabManager.instance.HealthBarPrefab.gameObject).GetComponent<UIWidget>();
-        Widget_HealthBar.SetAnchor(this.transform.Find("HealthBarPosition"));
-        Widget_HealthBar.GetComponent<UIHealthBar>().Init(this);
+		healthBar = Instantiate(PrefabManager.instance.HealthBarPrefab.gameObject).GetComponent<UIHealthBar>();
+		healthBar.Init(this);
+
+		// Damage Text
+		damageText = Instantiate(PrefabManager.instance.DamageTextPrefab.gameObject).GetComponent<UIDamageText>();
+		damageText.Init(this);
     }
 
     void InitUI_LocalPlayer()
@@ -189,6 +192,20 @@ public class Character : Photon.MonoBehaviour
     //---------------------------
     //      Update Functions
     //---------------------------
+	public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+	{
+		if(stream.isWriting)
+		{
+			stream.SendNext(this.State);
+			stream.SendNext(this.CurrentHealth);
+		}
+		else
+		{
+			this.State = (PlayerState)stream.ReceiveNext();
+			this.CurrentHealth = (float)stream.ReceiveNext();
+		}
+	}
+
     void Update()
 	{
         if (!this.isInited)
@@ -199,13 +216,6 @@ public class Character : Photon.MonoBehaviour
             UpdateMovement();
             UpdateKeyboardMovement();
         }
-    }
-
-    [PunRPC]
-    void UpdatePlayerState(PlayerState newState)
-    {
-        if (State != newState)
-            State = newState;
     }
 
     void UpdatePlayerAnimation()
@@ -261,12 +271,17 @@ public class Character : Photon.MonoBehaviour
 	}
 
 	//---------------------------
-	//      Other
+	//      
 	//---------------------------
 	public void RecieveDamage(float damage)
 	{
 		CurrentHealth -= damage;
-		Debug.Log("Heath: " + CurrentHealth);
+		this.photonView.RPC("RecieveDamage_RPC", PhotonTargets.AllViaServer, damage);
+	}
+
+	[PunRPC] void RecieveDamage_RPC(float damage)
+	{
+		damageText.ShowDamage(damage);
 	}
 
 

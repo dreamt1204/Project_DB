@@ -136,8 +136,8 @@ public static class TeamUTL
         return (player.GetTeam() == target.GetTeam());
     }
 
-    public static bool IsCharacterTeamMate(Character target)
+    public static bool IsCharacterMyTeamMate(Character target)
     {
-        return true; // IsTeamMate(target.ownerPlayer);        
+		return IsTeamMate(PhotonNetwork.player, target.ownerPlayer);        
     }
 }

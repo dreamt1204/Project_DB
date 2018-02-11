@@ -123,6 +123,7 @@ MonoBehaviour:
   ObservedComponents:
   - {fileID: 114992555771768740}
   - {fileID: 114847589812649756}
+  - {fileID: 114850430433781942}
   ObservedComponentsFoldoutOpen: 1
   viewIdField: 0
   instantiationId: -1
@@ -171,7 +172,7 @@ MonoBehaviour:
     SynchronizeEnabled: 1
     TeleportEnabled: 1
     TeleportIfDistanceGreaterThan: 3
-    InterpolateOption: 2
+    InterpolateOption: 1
     InterpolateMoveTowardsSpeed: 1
     InterpolateLerpSpeed: 1
     InterpolateMoveTowardsAcceleration: 2

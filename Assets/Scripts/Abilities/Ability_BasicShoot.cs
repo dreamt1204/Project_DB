@@ -75,6 +75,7 @@ public class Ability_BasicShoot : Ability
         {
             float rotation = Mathf.Atan2(joystick.joyStickPosX, joystick.joyStickPosY) * 180 / Mathf.PI;
             rangeIndicator.transform.rotation = Quaternion.Euler(0, rotation, 0);
+			ownerCharacter.shootingParentTransform.rotation = Quaternion.Euler(0, rotation, 0);
             aimingVector = new Vector3(joystick.joyStickPosX, 0, joystick.joyStickPosY).normalized;
         }
     }

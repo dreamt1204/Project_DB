@@ -36,6 +36,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4239672234200246}
   - component: {fileID: 114131863082991254}
+  - component: {fileID: 114615636029796666}
   - component: {fileID: 114741559612152594}
   - component: {fileID: 114672436308643592}
   m_Layer: 5
@@ -194,6 +195,22 @@ MonoBehaviour:
   hideIfOffScreen: 0
   keepAspectRatio: 0
   aspectRatio: 1
+--- !u!114 &114615636029796666
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1807859238136146}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 13e6525715fcfe34eb1fa8e16533b3f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  target: {fileID: 0}
+  gameCamera: {fileID: 0}
+  uiCamera: {fileID: 0}
+  disableIfInvisible: 1
+  destroyWithTarget: 1
 --- !u!114 &114672436308643592
 MonoBehaviour:
   m_ObjectHideFlags: 1
