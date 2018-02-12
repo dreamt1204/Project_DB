@@ -21,6 +21,7 @@ public class Ball : Photon.MonoBehaviour, IPunObservable
 
     // Flags
     [HideInInspector] public bool sentPickup;
+    bool isShot = false;
 
     // Variables
 	[HideInInspector] public Rigidbody body;
@@ -82,7 +83,7 @@ public class Ball : Photon.MonoBehaviour, IPunObservable
                 {
                     this.attacker = (Character)data[1];
                 }
-                // Get attacker
+                // Get direction
                 else if (i == 2)
                 {
                     this.startingVector = (Vector3)data[2];
@@ -91,9 +92,9 @@ public class Ball : Photon.MonoBehaviour, IPunObservable
         }
 
         // Start the ball as projectile if it meets the following requirements
-        if ((State == BallState.Shooting) && (attacker != null) && (this.attacker.isControllable))
+        if ((State == BallState.Shooting) && (attacker != null))
         {
-            Shoot();
+            Shoot((int)data[3]);
         }
     }
 
@@ -194,11 +195,13 @@ public class Ball : Photon.MonoBehaviour, IPunObservable
 	//---------------------------
 	//      Shoot
 	//---------------------------
-    void Shoot()
+    void Shoot(int spawnTime)
     {
-        // Give ball a force to fly
+        int deltaTime = PhotonNetwork.ServerTimestamp - spawnTime;
         float startingSpeed = GetBallStartSpeed();
-        body.velocity = new Vector3(this.startingVector.x * startingSpeed, 0, this.startingVector.z * startingSpeed);
+
+        this.transform.position += new Vector3(this.body.velocity.x * deltaTime, 0, this.body.velocity.z * deltaTime);
+        this.body.velocity = new Vector3(this.startingVector.x * startingSpeed, 0, this.startingVector.z * startingSpeed);
     }
 
 	//---------------------------
@@ -250,12 +253,13 @@ public class Ball : Photon.MonoBehaviour, IPunObservable
         return PhotonNetwork.Instantiate(ballPrefab.name, spawnPos, Quaternion.identity, 0, data).GetComponent<Ball>();
     }
 
-    public static Ball SpawnShootingBall(Ball ballPrefab, Vector3 spawnPos, Character attacker, Vector3 aimingVector)
+    public static Ball SpawnShootingBall(Ball ballPrefab, Vector3 spawnPos, Character attacker, Vector3 aimingVector, int spawnTime)
     {
-        object[] data = new object[3];
+        object[] data = new object[4];
         data[0] = BallState.Shooting;
         data[1] = attacker;
         data[2] = aimingVector;
+        data[3] = spawnTime;
 
         return PhotonNetwork.Instantiate(ballPrefab.name, spawnPos, Quaternion.identity, 0, data).GetComponent<Ball>();
     }

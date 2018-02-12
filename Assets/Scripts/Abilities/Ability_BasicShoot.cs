@@ -115,7 +115,7 @@ public class Ability_BasicShoot : Ability
     public override void ActivateAbility()
     {
         Vector3 shootingPos = ownerCharacter.shootingPositionTransform.position;
-        Ball.SpawnShootingBall(ballPrefab, shootingPos, ownerCharacter, aimingVector);
+        Ball.SpawnShootingBall(ballPrefab, shootingPos, ownerCharacter, aimingVector, PhotonNetwork.ServerTimestamp);
     }
 
     //---------------------------

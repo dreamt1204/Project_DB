@@ -48,4 +48,5 @@ MonoBehaviour:
   - UpdateBallState
   - UpdatePlayerState
   - RecieveDamage_RPC
+  - Shoot_RPC
   DisableAutoOpenWizard: 1
