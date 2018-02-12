@@ -21,7 +21,6 @@ public class Ball : Photon.MonoBehaviour, IPunObservable
 
     // Flags
     [HideInInspector] public bool sentPickup;
-    bool isShot = false;
 
     // Variables
 	[HideInInspector] public Rigidbody body;

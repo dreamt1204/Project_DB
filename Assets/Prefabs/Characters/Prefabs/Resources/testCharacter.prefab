@@ -465,10 +465,10 @@ MonoBehaviour:
   m_PositionModel:
     SynchronizeEnabled: 1
     TeleportEnabled: 1
-    TeleportIfDistanceGreaterThan: 3
-    InterpolateOption: 1
-    InterpolateMoveTowardsSpeed: 2
-    InterpolateLerpSpeed: 2
+    TeleportIfDistanceGreaterThan: 2
+    InterpolateOption: 4
+    InterpolateMoveTowardsSpeed: 3
+    InterpolateLerpSpeed: 5
     InterpolateMoveTowardsAcceleration: 2
     InterpolateMoveTowardsDeceleration: 2
     InterpolateSpeedCurve:
@@ -502,7 +502,7 @@ MonoBehaviour:
       m_PostInfinity: 2
       m_RotationOrder: 4
     ExtrapolateOption: 1
-    ExtrapolateSpeed: 1
+    ExtrapolateSpeed: 5
     ExtrapolateIncludingRoundTripTime: 1
     ExtrapolateNumberOfStoredPositions: 1
     DrawErrorGizmo: 1
