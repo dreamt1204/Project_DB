@@ -31,6 +31,11 @@ public class NetworkManager : Photon.MonoBehaviour
             Debug.Log("Update() was called by Unity. Scene is loaded. Let's connect to the Photon Master Server. Calling: PhotonNetwork.ConnectUsingSettings();");
 
             ConnectInUpdate = false;
+
+            // DB_TODO: Temporary solution to set player ID. Update this later with the real player account ID.
+            string randomUserID = DateTime.Now.TimeOfDay.ToString();
+            PhotonNetwork.AuthValues = new AuthenticationValues(randomUserID);
+
             PhotonNetwork.ConnectUsingSettings(Version + "." + SceneManagerHelper.ActiveSceneBuildIndex);
         }
     }
