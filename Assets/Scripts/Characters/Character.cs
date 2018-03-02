@@ -22,7 +22,14 @@ public class Character : Photon.MonoBehaviour, IPunObservable
     // Flags
     bool isInited = false;
     public bool isControllable = false;
-
+    Dictionary<string, bool> onBound  = new Dictionary<string, bool>()
+    {
+        {"Top", false},
+        {"Bot", false},
+        {"Left", false},
+        {"Right", false}
+    };
+    
     // Variables
     [HideInInspector] public PhotonPlayer ownerPlayer;
     PlayerState state;
@@ -30,6 +37,8 @@ public class Character : Photon.MonoBehaviour, IPunObservable
 	[HideInInspector] public Transform transforms;
 	[HideInInspector] public Transform shootingParentTransform;
     [HideInInspector] public Transform shootingPositionTransform;
+    float movementInputX = 0;
+    float movementInputY = 0;
 
     // Information
     [Header("Information")]
@@ -57,7 +66,6 @@ public class Character : Photon.MonoBehaviour, IPunObservable
 	UIJoyStick joystickMovement;
 	UIHealthBar healthBar;
 	UIDamageText damageText;
-
 
     //---------------------------
     //      Properties
@@ -213,9 +221,10 @@ public class Character : Photon.MonoBehaviour, IPunObservable
 
         if (this.isControllable)
         {
-            UpdateMovement();
-            UpdateKeyboardMovement();
+            UpdateMovementInput();
         }
+
+        UpdateMovement();
     }
 
     void UpdatePlayerAnimation()
@@ -250,28 +259,93 @@ public class Character : Photon.MonoBehaviour, IPunObservable
     }
 
     //---------------------------
+    //      Collision events
+    //---------------------------
+    /*
+    void OnTriggerEnter(Collider col)
+    {
+        string colliderName = col.gameObject.name;
+
+        // Check boudary collision
+        string boundID = GetOnTriggeredBound(colliderName);
+        if (boundID != "")
+            onBound[boundID] = true;
+    }
+
+    void OnTriggerExit(Collider col)
+    {
+        string colliderName = col.gameObject.name;
+
+        // Check boudary collision
+        string boundID = GetOnTriggeredBound(colliderName);
+        if (boundID != "" && onBound[boundID] == true)
+            onBound[boundID] = false;
+    }
+
+    string GetOnTriggeredBound(string colliderName)
+    {
+        if (colliderName.Contains("Bound_") && !colliderName.Contains("Ground"))
+        {
+            string boundID = colliderName.Substring(6);
+
+            if (boundID == "Mid")
+            {
+                if (ownerPlayer.GetTeam() == Team.Blue)
+                    boundID = "Right";
+                if (ownerPlayer.GetTeam() == Team.Red)
+                    boundID = "Left";
+            }
+
+            if (onBound.ContainsKey(boundID))
+                return boundID;
+        }
+
+        return "";
+    }
+    */
+
+    //---------------------------
     //      Movement
     //---------------------------
+    void UpdateMovementInput()
+    {
+        float newInputX = this.joystickMovement.joyStickPosX != 0 ? this.joystickMovement.joyStickPosX : Input.GetAxis("Horizontal");
+        float newInputY = this.joystickMovement.joyStickPosY != 0 ? this.joystickMovement.joyStickPosY : Input.GetAxis("Vertical");
+
+        if ((movementInputX != newInputX) || (movementInputY != newInputY))
+            this.photonView.RPC("UpdateMovementInput_RPC", PhotonTargets.AllViaServer, newInputX, newInputY);
+    }
+
+    [PunRPC]
+    void UpdateMovementInput_RPC(float newInputX, float newInputY)
+    {
+        movementInputX = newInputX;
+        movementInputY = newInputY;
+    }
+
     void UpdateMovement()
 	{
-		float speedFactor = speed * speedMultiplier;
+        this.body.velocity = Vector3.zero;
 
-        this.body.velocity = new Vector3(this.joystickMovement.joyStickPosX * speedFactor, 0, this.joystickMovement.joyStickPosY * speedFactor);
-	}
+        if ((movementInputX == 0) && (movementInputY == 0))
+            return;
 
-	void UpdateKeyboardMovement()
-	{
-		if (this.joystickMovement.joyStickPosX != 0)
-			return;
-		if (this.joystickMovement.joyStickPosY != 0)
-			return;
+        float movementFactor = speed * speedMultiplier * Time.deltaTime;
+        float posX = this.transform.position.x;
+        float posZ = this.transform.position.z;
 
-		float speedFactor = speed * speedMultiplier;
-        this.body.velocity = new Vector3(Input.GetAxis("Horizontal") * speedFactor, 0, Input.GetAxis("Vertical") * speedFactor);
-	}
+        if (((movementInputX > 0) && (!onBound["Right"])) || ((movementInputX < 0) && (!onBound["Left"])))
+            posX += (movementInputX * movementFactor);
+
+        if (((movementInputY > 0) && (!onBound["Top"])) || ((movementInputY < 0) && (!onBound["Bot"])))
+            posZ += (movementInputY * movementFactor);
+
+        Vector3 newPos = new Vector3(posX, 0, posZ);
+        this.body.MovePosition(newPos);
+    }
 
 	//---------------------------
-	//      
+	//      Actions
 	//---------------------------
 	public void RecieveDamage(float damage)
 	{
