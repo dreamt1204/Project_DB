@@ -22,18 +22,11 @@ public class Character : Photon.MonoBehaviour, IPunObservable
     // Flags
     bool isInited = false;
     public bool isControllable = false;
-    Dictionary<string, bool> onBound  = new Dictionary<string, bool>()
-    {
-        {"Top", false},
-        {"Bot", false},
-        {"Left", false},
-        {"Right", false}
-    };
     
     // Variables
     [HideInInspector] public PhotonPlayer ownerPlayer;
     PlayerState state;
-    Rigidbody body;
+    CharacterController characterController;
 	[HideInInspector] public Transform transforms;
 	[HideInInspector] public Transform shootingParentTransform;
     [HideInInspector] public Transform shootingPositionTransform;
@@ -137,7 +130,7 @@ public class Character : Photon.MonoBehaviour, IPunObservable
 
     void InitInstances()
     {
-        this.body = transform.GetComponent<Rigidbody>();
+        this.characterController = transform.GetComponent<CharacterController>();
 		this.transforms = this.transform.Find("Transforms");
 		this.shootingParentTransform = this.transforms.Find("ShootingParent");
 		this.shootingPositionTransform = this.shootingParentTransform.Find("ShootingPosition");
@@ -259,52 +252,6 @@ public class Character : Photon.MonoBehaviour, IPunObservable
     }
 
     //---------------------------
-    //      Collision events
-    //---------------------------
-    /*
-    void OnTriggerEnter(Collider col)
-    {
-        string colliderName = col.gameObject.name;
-
-        // Check boudary collision
-        string boundID = GetOnTriggeredBound(colliderName);
-        if (boundID != "")
-            onBound[boundID] = true;
-    }
-
-    void OnTriggerExit(Collider col)
-    {
-        string colliderName = col.gameObject.name;
-
-        // Check boudary collision
-        string boundID = GetOnTriggeredBound(colliderName);
-        if (boundID != "" && onBound[boundID] == true)
-            onBound[boundID] = false;
-    }
-
-    string GetOnTriggeredBound(string colliderName)
-    {
-        if (colliderName.Contains("Bound_") && !colliderName.Contains("Ground"))
-        {
-            string boundID = colliderName.Substring(6);
-
-            if (boundID == "Mid")
-            {
-                if (ownerPlayer.GetTeam() == Team.Blue)
-                    boundID = "Right";
-                if (ownerPlayer.GetTeam() == Team.Red)
-                    boundID = "Left";
-            }
-
-            if (onBound.ContainsKey(boundID))
-                return boundID;
-        }
-
-        return "";
-    }
-    */
-
-    //---------------------------
     //      Movement
     //---------------------------
     void UpdateMovementInput()
@@ -325,23 +272,13 @@ public class Character : Photon.MonoBehaviour, IPunObservable
 
     void UpdateMovement()
 	{
-        this.body.velocity = Vector3.zero;
-
         if ((movementInputX == 0) && (movementInputY == 0))
             return;
 
-        float movementFactor = speed * speedMultiplier * Time.deltaTime;
-        float posX = this.transform.position.x;
-        float posZ = this.transform.position.z;
+        float movementFactor = speed * speedMultiplier;
+        Vector3 dir = new Vector3((movementInputX * movementFactor), 0, (movementInputY * movementFactor));
 
-        if (((movementInputX > 0) && (!onBound["Right"])) || ((movementInputX < 0) && (!onBound["Left"])))
-            posX += (movementInputX * movementFactor);
-
-        if (((movementInputY > 0) && (!onBound["Top"])) || ((movementInputY < 0) && (!onBound["Bot"])))
-            posZ += (movementInputY * movementFactor);
-
-        Vector3 newPos = new Vector3(posX, 0, posZ);
-        this.body.MovePosition(newPos);
+        this.characterController.SimpleMove(dir);
     }
 
 	//---------------------------

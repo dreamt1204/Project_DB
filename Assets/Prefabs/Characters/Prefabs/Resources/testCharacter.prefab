@@ -98,7 +98,6 @@ GameObject:
   - component: {fileID: 4318297877785582}
   - component: {fileID: 33365515602974944}
   - component: {fileID: 23159699249017948}
-  - component: {fileID: 136310943812307144}
   m_Layer: 8
   m_Name: Model
   m_TagString: Untagged
@@ -147,8 +146,8 @@ GameObject:
   m_Component:
   - component: {fileID: 4255900679913062}
   - component: {fileID: 114604622264814306}
+  - component: {fileID: 143727661870334190}
   - component: {fileID: 114921545013966524}
-  - component: {fileID: 54478207111077922}
   m_Layer: 8
   m_Name: testCharacter
   m_TagString: Untagged
@@ -398,21 +397,6 @@ MeshFilter:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1144268065899184}
   m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
---- !u!54 &54478207111077922
-Rigidbody:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1865825724528342}
-  serializedVersion: 2
-  m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0
-  m_UseGravity: 0
-  m_IsKinematic: 0
-  m_Interpolate: 0
-  m_Constraints: 116
-  m_CollisionDetection: 0
 --- !u!114 &114604622264814306
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -462,16 +446,20 @@ MonoBehaviour:
   instantiationId: -1
   currentMasterID: -1
   isRuntimeInstantiated: 0
---- !u!136 &136310943812307144
-CapsuleCollider:
+--- !u!143 &143727661870334190
+CharacterController:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1503853414199054}
+  m_GameObject: {fileID: 1865825724528342}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
   m_Enabled: 1
-  m_Radius: 0.5
+  serializedVersion: 2
   m_Height: 2
-  m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Radius: 0.5
+  m_SlopeLimit: 45
+  m_StepOffset: 0.3
+  m_SkinWidth: 0.08
+  m_MinMoveDistance: 0.001
+  m_Center: {x: 0, y: 1, z: 0}
