@@ -30,6 +30,7 @@ public class Character : Photon.MonoBehaviour, IPunObservable
 	[HideInInspector] public Transform transforms;
 	[HideInInspector] public Transform shootingParentTransform;
     [HideInInspector] public Transform shootingPositionTransform;
+    Vector3 correctPos;
     float movementInputX = 0;
     float movementInputY = 0;
 
@@ -107,6 +108,7 @@ public class Character : Photon.MonoBehaviour, IPunObservable
     void Init(PhotonPlayer player)
     {
         this.ownerPlayer = player;
+        this.correctPos = this.transform.position;
 
         // Init instances
         InitInstances();
@@ -197,19 +199,24 @@ public class Character : Photon.MonoBehaviour, IPunObservable
 	{
 		if(stream.isWriting)
 		{
-			stream.SendNext(this.State);
+            this.correctPos = this.transform.position;
+            stream.SendNext(this.transform.position);
+
             stream.SendNext(this.State);
+
 			stream.SendNext(this.CurrentHealth);
 		}
 		else
 		{
-			this.State = (PlayerState)stream.ReceiveNext();
+            this.correctPos = (Vector3)stream.ReceiveNext();
+
             this.State = (PlayerState)stream.ReceiveNext();
+
 			this.CurrentHealth = (float)stream.ReceiveNext();
 		}
 	}
 
-    void Update()
+    void FixedUpdate()
 	{
         if (!this.isInited)
             return;
@@ -261,25 +268,37 @@ public class Character : Photon.MonoBehaviour, IPunObservable
         float newInputX = this.joystickMovement.joyStickPosX != 0 ? this.joystickMovement.joyStickPosX : Input.GetAxis("Horizontal");
         float newInputY = this.joystickMovement.joyStickPosY != 0 ? this.joystickMovement.joyStickPosY : Input.GetAxis("Vertical");
 
-        if ((movementInputX != newInputX) || (movementInputY != newInputY))
+        if ((this.movementInputX != newInputX) || (this.movementInputY != newInputY))
             this.photonView.RPC("UpdateMovementInput_RPC", PhotonTargets.AllViaServer, newInputX, newInputY);
     }
 
     [PunRPC]
     void UpdateMovementInput_RPC(float newInputX, float newInputY)
     {
-        movementInputX = newInputX;
-        movementInputY = newInputY;
+        this.movementInputX = newInputX;
+        this.movementInputY = newInputY;
     }
 
     void UpdateMovement()
 	{
-        if ((movementInputX == 0) && (movementInputY == 0))
+        float movementFactor = speed * speedMultiplier;
+        Vector3 dir = new Vector3((this.movementInputX * movementFactor), 0, (this.movementInputY * movementFactor));
+
+        if (!isControllable)
+        {
+            Debug.Log("Distance: " + Vector3.Distance(this.transform.position, this.correctPos));
+            
+            if (Vector3.Distance(this.transform.position, this.correctPos + dir) > 0.1)
+            {
+                Vector3 offset = this.correctPos - this.transform.position;
+                this.characterController.SimpleMove(offset * movementFactor);
+            }
+        }
+
+        if ((this.movementInputX == 0) && (this.movementInputY == 0))
             return;
 
-        float movementFactor = speed * speedMultiplier;
-        Vector3 dir = new Vector3((movementInputX * movementFactor), 0, (movementInputY * movementFactor));
-
+        
         this.characterController.SimpleMove(dir);
     }
 
