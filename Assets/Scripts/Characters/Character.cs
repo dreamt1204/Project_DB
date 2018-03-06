@@ -198,11 +198,13 @@ public class Character : Photon.MonoBehaviour, IPunObservable
 		if(stream.isWriting)
 		{
 			stream.SendNext(this.State);
+            stream.SendNext(this.State);
 			stream.SendNext(this.CurrentHealth);
 		}
 		else
 		{
 			this.State = (PlayerState)stream.ReceiveNext();
+            this.State = (PlayerState)stream.ReceiveNext();
 			this.CurrentHealth = (float)stream.ReceiveNext();
 		}
 	}
