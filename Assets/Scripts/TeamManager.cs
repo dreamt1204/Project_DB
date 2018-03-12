@@ -69,7 +69,7 @@ public class TeamManager : MonoBehaviour
         for (int i = 0; i < PhotonNetwork.playerList.Length; i++)
         {
             PhotonPlayer player = PhotonNetwork.playerList[i];
-            Team playerTeam = player.GetTeam();
+            Team playerTeam = player.GetDBTeam();
             PlayersPerTeam[playerTeam].Add(player);
         }
     }
@@ -77,7 +77,7 @@ public class TeamManager : MonoBehaviour
 
 public static class TeamUTL
 {
-    public static Team GetTeam(this PhotonPlayer player)
+    public static Team GetDBTeam(this PhotonPlayer player)
     {
         object teamId;
         if (player.CustomProperties.TryGetValue(TeamManager.TeamPlayerProp, out teamId))
@@ -92,9 +92,9 @@ public static class TeamUTL
     {
         string teamString = "None";
 
-        if (player.GetTeam() == Team.Blue)
+        if (player.GetDBTeam() == Team.Blue)
             teamString = "Blue";
-        else if (player.GetTeam() == Team.Red)
+        else if (player.GetDBTeam() == Team.Red)
             teamString = "Red";
 
         return teamString;
@@ -102,13 +102,13 @@ public static class TeamUTL
 
     public static int GetTeamPos(this PhotonPlayer player)
     {
-        Team team = player.GetTeam();
+        Team team = player.GetDBTeam();
         UTL.TryCatchError(team == Team.None, "Player doesn't have team. Cannot get this player's team position.");
 
         return TeamManager.PlayersPerTeam[team].IndexOf(player);
     }
 
-    public static void SetTeam(this PhotonPlayer player, Team team)
+    public static void SetDBTeam(this PhotonPlayer player, Team team)
     {
         if (!PhotonNetwork.connectedAndReady)
         {
@@ -116,7 +116,7 @@ public static class TeamUTL
             return;
         }
 
-        Team currentTeam = player.GetTeam();
+        Team currentTeam = player.GetDBTeam();
         if (currentTeam != team)
         {
             player.SetCustomProperties(new Hashtable() { { PunTeams.TeamPlayerProp, (byte)team } });
@@ -126,14 +126,14 @@ public static class TeamUTL
     public static void AutoAssignTeam(this PhotonPlayer player)
     {
         if (TeamManager.PlayersPerTeam[Team.Blue].Count <= TeamManager.PlayersPerTeam[Team.Red].Count)
-            player.SetTeam(Team.Blue);
+            player.SetDBTeam(Team.Blue);
         else
-            player.SetTeam(Team.Red);
+            player.SetDBTeam(Team.Red);
     }
 
     public static bool IsTeamMate(this PhotonPlayer player, PhotonPlayer target)
     {
-        return (player.GetTeam() == target.GetTeam());
+        return (player.GetDBTeam() == target.GetDBTeam());
     }
 
     public static bool IsCharacterMyTeamMate(Character target)

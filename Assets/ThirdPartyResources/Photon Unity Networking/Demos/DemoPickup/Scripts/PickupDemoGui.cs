@@ -67,11 +67,11 @@ public class PickupDemoGui : MonoBehaviour
 
             if (GUILayout.Button("to red"))
             {
-                PhotonNetwork.player.SetPUNTeam(PunTeams.Team.red);
+                PhotonNetwork.player.SetTeam(PunTeams.Team.red);
             }
             if (GUILayout.Button("to blue"))
             {
-                PhotonNetwork.player.SetPUNTeam(PunTeams.Team.blue);
+                PhotonNetwork.player.SetTeam(PunTeams.Team.blue);
             }
         }
     }

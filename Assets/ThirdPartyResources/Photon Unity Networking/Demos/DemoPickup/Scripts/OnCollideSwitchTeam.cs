@@ -15,7 +15,7 @@ public class OnCollideSwitchTeam : MonoBehaviour
         PhotonView otherPv = other.GetComponent<PhotonView>();
         if (otherPv != null && otherPv.isMine)
         {
-            PhotonNetwork.player.SetPUNTeam(this.TeamToSwitchTo);
+            PhotonNetwork.player.SetTeam(this.TeamToSwitchTo);
         }
     }
 }

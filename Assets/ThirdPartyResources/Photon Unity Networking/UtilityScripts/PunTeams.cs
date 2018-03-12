@@ -47,7 +47,7 @@ public class PunTeams : MonoBehaviour
     public void OnJoinedRoom()
     {
 
-        this.UpdatePunTeams();
+        this.UpdateTeams();
     }
 
 	public void OnLeftRoom()
@@ -59,23 +59,23 @@ public class PunTeams : MonoBehaviour
     /// <remarks>Called by PUN. See enum PhotonNetworkingMessage for an explanation.</remarks>
     public void OnPhotonPlayerPropertiesChanged(object[] playerAndUpdatedProps)
     {
-        this.UpdatePunTeams();
+        this.UpdateTeams();
     }
 
 	public void OnPhotonPlayerDisconnected(PhotonPlayer otherPlayer)
 	{
-		this.UpdatePunTeams();
+		this.UpdateTeams();
 	}
 
 	public void OnPhotonPlayerConnected(PhotonPlayer newPlayer)
 	{
-		this.UpdatePunTeams();
+		this.UpdateTeams();
 	}
 
     #endregion
 
 
-    public void UpdatePunTeams()
+    public void UpdateTeams()
     {
         Array enumVals = Enum.GetValues(typeof(Team));
         foreach (var enumVal in enumVals)
@@ -86,7 +86,7 @@ public class PunTeams : MonoBehaviour
         for (int i = 0; i < PhotonNetwork.playerList.Length; i++)
         {
             PhotonPlayer player = PhotonNetwork.playerList[i];
-            Team playerTeam = player.GetPUNTeam();
+            Team playerTeam = player.GetTeam();
             PlayersPerTeam[playerTeam].Add(player);
         }
     }
@@ -97,7 +97,7 @@ public static class TeamExtensions
 {
     /// <summary>Extension for PhotonPlayer class to wrap up access to the player's custom property.</summary>
     /// <returns>PunTeam.Team.none if no team was found (yet).</returns>
-    public static PunTeams.Team GetPUNTeam(this PhotonPlayer player)
+    public static PunTeams.Team GetTeam(this PhotonPlayer player)
     {
         object teamId;
         if (player.CustomProperties.TryGetValue(PunTeams.TeamPlayerProp, out teamId))
@@ -112,7 +112,7 @@ public static class TeamExtensions
     /// <remarks>Internally checks if this player is in that team already or not. Only team switches are actually sent.</remarks>
     /// <param name="player"></param>
     /// <param name="team"></param>
-    public static void SetPUNTeam(this PhotonPlayer player, PunTeams.Team team)
+    public static void SetTeam(this PhotonPlayer player, PunTeams.Team team)
     {
         if (!PhotonNetwork.connectedAndReady)
         {
@@ -120,7 +120,7 @@ public static class TeamExtensions
             return;
         }
 
-        PunTeams.Team currentTeam = player.GetPUNTeam();
+        PunTeams.Team currentTeam = player.GetTeam();
         if (currentTeam != team)
         {
             player.SetCustomProperties(new Hashtable() {{PunTeams.TeamPlayerProp, (byte) team}});

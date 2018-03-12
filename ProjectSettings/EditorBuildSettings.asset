@@ -6,5 +6,8 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Scenes/MatchLobby.unity
+    guid: 1b606ffb468085244b72c22d5a426896
+  - enabled: 1
     path: Assets/Scenes/testScene.unity
     guid: caf01fbc74af74d0a9306ac212c7eb0d
