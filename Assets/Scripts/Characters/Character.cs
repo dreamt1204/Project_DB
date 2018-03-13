@@ -31,6 +31,11 @@ public class Character : Photon.MonoBehaviour, IPunObservable
     [HideInInspector] public Transform transforms;
 	[HideInInspector] public Transform shootingParentTransform;
     [HideInInspector] public Transform shootingPositionTransform;
+<<<<<<< HEAD
+=======
+    float movementInputX = 0;
+    float movementInputY = 0;
+>>>>>>> parent of 18e74fa... WIP
 
     // Information
     [Header("Information")]
@@ -197,17 +202,25 @@ public class Character : Photon.MonoBehaviour, IPunObservable
 	{
 		if(stream.isWriting)
 		{
+<<<<<<< HEAD
+=======
+			stream.SendNext(this.State);
+>>>>>>> parent of 18e74fa... WIP
             stream.SendNext(this.State);
 			stream.SendNext(this.CurrentHealth);
 		}
 		else
 		{
+<<<<<<< HEAD
+=======
+			this.State = (PlayerState)stream.ReceiveNext();
+>>>>>>> parent of 18e74fa... WIP
             this.State = (PlayerState)stream.ReceiveNext();
 			this.CurrentHealth = (float)stream.ReceiveNext();
         }
 	}
 
-    void FixedUpdate()
+    void Update()
 	{
         if (!this.isInited)
             return;
@@ -252,6 +265,7 @@ public class Character : Photon.MonoBehaviour, IPunObservable
     //---------------------------
     //      Movement
     //---------------------------
+<<<<<<< HEAD
     void UpdateMovement()
     {
         Vector2 moveDir;
@@ -270,6 +284,33 @@ public class Character : Photon.MonoBehaviour, IPunObservable
         Vector3 moveVelocity = new Vector3(moveDir.x, 0, moveDir.y).normalized * moveSpeed;
         this.photonTransformView.SetSynchronizedValues(moveVelocity, 0);
         this.characterController.Move(moveVelocity * Time.fixedDeltaTime);
+=======
+    void UpdateMovementInput()
+    {
+        float newInputX = this.joystickMovement.joyStickPosX != 0 ? this.joystickMovement.joyStickPosX : Input.GetAxis("Horizontal");
+        float newInputY = this.joystickMovement.joyStickPosY != 0 ? this.joystickMovement.joyStickPosY : Input.GetAxis("Vertical");
+
+        if ((movementInputX != newInputX) || (movementInputY != newInputY))
+            this.photonView.RPC("UpdateMovementInput_RPC", PhotonTargets.AllViaServer, newInputX, newInputY);
+    }
+
+    [PunRPC]
+    void UpdateMovementInput_RPC(float newInputX, float newInputY)
+    {
+        movementInputX = newInputX;
+        movementInputY = newInputY;
+    }
+
+    void UpdateMovement()
+	{
+        if ((movementInputX == 0) && (movementInputY == 0))
+            return;
+
+        float movementFactor = speed * speedMultiplier;
+        Vector3 dir = new Vector3((movementInputX * movementFactor), 0, (movementInputY * movementFactor));
+
+        this.characterController.SimpleMove(dir);
+>>>>>>> parent of 18e74fa... WIP
     }
 
 	//---------------------------
