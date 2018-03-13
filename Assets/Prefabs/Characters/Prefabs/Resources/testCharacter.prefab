@@ -415,7 +415,7 @@ MonoBehaviour:
     TeleportIfDistanceGreaterThan: 2
     InterpolateOption: 3
     InterpolateMoveTowardsSpeed: 5
-    InterpolateLerpSpeed: 1
+    InterpolateLerpSpeed: 5
     InterpolateMoveTowardsAcceleration: 2
     InterpolateMoveTowardsDeceleration: 2
     InterpolateSpeedCurve:
