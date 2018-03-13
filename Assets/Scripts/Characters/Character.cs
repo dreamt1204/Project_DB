@@ -210,7 +210,7 @@ public class Character : Photon.MonoBehaviour, IPunObservable
         }
 	}
 
-    void Update()
+    void FixedUpdate()
 	{
         if (!this.isInited)
             return;
@@ -255,7 +255,6 @@ public class Character : Photon.MonoBehaviour, IPunObservable
     //---------------------------
     //      Movement
     //---------------------------
-
     void UpdateMovement()
     {
         Vector2 moveDir;
@@ -273,7 +272,7 @@ public class Character : Photon.MonoBehaviour, IPunObservable
 
         Vector3 moveVelocity = new Vector3(moveDir.x, 0, moveDir.y).normalized * moveSpeed;
         this.characterController.Move(moveVelocity * Time.fixedDeltaTime);
-        this.photonTransformView.SetSynchronizedValues(this.characterController.velocity, 0);
+        //this.photonTransformView.SetSynchronizedValues(this.characterController.velocity, 0);
     }
 
     /*

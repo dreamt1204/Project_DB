@@ -148,7 +148,7 @@ GameObject:
   - component: {fileID: 114604622264814306}
   - component: {fileID: 143727661870334190}
   - component: {fileID: 114921545013966524}
-  - component: {fileID: 114078431454339482}
+  - component: {fileID: 114111839100961618}
   m_Layer: 8
   m_Name: testCharacter
   m_TagString: Untagged
@@ -398,7 +398,7 @@ MeshFilter:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1144268065899184}
   m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
---- !u!114 &114078431454339482
+--- !u!114 &114111839100961618
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -412,10 +412,10 @@ MonoBehaviour:
   m_PositionModel:
     SynchronizeEnabled: 1
     TeleportEnabled: 1
-    TeleportIfDistanceGreaterThan: 2
-    InterpolateOption: 3
-    InterpolateMoveTowardsSpeed: 5
-    InterpolateLerpSpeed: 5
+    TeleportIfDistanceGreaterThan: 3
+    InterpolateOption: 2
+    InterpolateMoveTowardsSpeed: 1
+    InterpolateLerpSpeed: 1
     InterpolateMoveTowardsAcceleration: 2
     InterpolateMoveTowardsDeceleration: 2
     InterpolateSpeedCurve:
@@ -448,7 +448,7 @@ MonoBehaviour:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-    ExtrapolateOption: 1
+    ExtrapolateOption: 0
     ExtrapolateSpeed: 1
     ExtrapolateIncludingRoundTripTime: 1
     ExtrapolateNumberOfStoredPositions: 1
@@ -507,7 +507,7 @@ MonoBehaviour:
   ownershipTransfer: 0
   ObservedComponents:
   - {fileID: 114604622264814306}
-  - {fileID: 114078431454339482}
+  - {fileID: 114111839100961618}
   ObservedComponentsFoldoutOpen: 1
   viewIdField: 0
   instantiationId: -1
