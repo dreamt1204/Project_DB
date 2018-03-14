@@ -155,15 +155,19 @@ public class Ball : Photon.MonoBehaviour, IPunObservable
     //---------------------------
     void OnCollisionEnter(Collision col)
     {
-		Character collider_char = col.gameObject.GetComponent<Character>();
-
-		if (collider_char != null && collider_char.isControllable)
+        // Player character collision event is handled by character class because of CharacterController class.
+        if (col.gameObject.tag == "Player")
         {
-			if (this.State == BallState.Unpicked)
-                PickUp(collider_char);
-			else if (this.State == BallState.Shooting)
-				Hit(collider_char);
+            OnHitCharacter(col.gameObject.GetComponent<Character>());
         }
+    }
+
+    public void OnHitCharacter(Character target)
+    {
+        if (this.State == BallState.Unpicked)
+            PickUp(target);
+        else if (this.State == BallState.Shooting)
+            Hit(target);
     }
 
     //---------------------------

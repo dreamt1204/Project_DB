@@ -27,13 +27,9 @@ public class Character : Photon.MonoBehaviour, IPunObservable
     [HideInInspector] public PhotonPlayer ownerPlayer;
     PlayerState state;
     CharacterController characterController;
-    PhotonTransformView photonTransformView;
     [HideInInspector] public Transform transforms;
 	[HideInInspector] public Transform shootingParentTransform;
     [HideInInspector] public Transform shootingPositionTransform;
-
-    float movementInputX = 0;
-    float movementInputY = 0;
 
     // Information
     [Header("Information")]
@@ -133,7 +129,6 @@ public class Character : Photon.MonoBehaviour, IPunObservable
     void InitInstances()
     {
         this.characterController = this.transform.GetComponent<CharacterController>();
-        this.photonTransformView = this.transform.GetComponent<PhotonTransformView>();
         this.transforms = this.transform.Find("Transforms");
 		this.shootingParentTransform = this.transforms.Find("ShootingParent");
 		this.shootingPositionTransform = this.shootingParentTransform.Find("ShootingPosition");
@@ -253,45 +248,35 @@ public class Character : Photon.MonoBehaviour, IPunObservable
     }
 
     //---------------------------
+    //      Collision events
+    //---------------------------
+    void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        if (!isControllable)
+            return;
+
+        if (hit.gameObject.tag == "Ball")
+        {
+            hit.gameObject.GetComponent<Ball>().OnHitCharacter(this);
+        }
+    }
+
+    //---------------------------
     //      Movement
     //---------------------------
     void UpdateMovement()
     {
-        Vector2 moveDir;
-
-        // reset moving input on release
         if (Input.GetAxisRaw("Horizontal") == 0 && Input.GetAxisRaw("Vertical") == 0)
-        {
-            moveDir = Vector2.zero;
-        }
-        else
-        {
-            moveDir = new Vector2(this.joystickMovement.joyStickPosX != 0 ? this.joystickMovement.joyStickPosX : Input.GetAxis("Horizontal"),
-                                  this.joystickMovement.joyStickPosY != 0 ? this.joystickMovement.joyStickPosY : Input.GetAxis("Vertical"));
-        }
+            return;
 
-        Vector3 moveVelocity = new Vector3(moveDir.x, 0, moveDir.y).normalized * moveSpeed;
+        Vector2 moveDir = new Vector2(this.joystickMovement.joyStickPosX != 0 ? this.joystickMovement.joyStickPosX : Input.GetAxis("Horizontal"),
+                                      this.joystickMovement.joyStickPosY != 0 ? this.joystickMovement.joyStickPosY : Input.GetAxis("Vertical"));
+
+        float moveDirectionz = -0.05f;
+
+        Vector3 moveVelocity = new Vector3(moveDir.x, moveDirectionz, moveDir.y) * moveSpeed;
         this.characterController.Move(moveVelocity * Time.fixedDeltaTime);
-        //this.photonTransformView.SetSynchronizedValues(this.characterController.velocity, 0);
     }
-
-    /*
-    void UpdateMovementInput()
-    {
-        float newInputX = this.joystickMovement.joyStickPosX != 0 ? this.joystickMovement.joyStickPosX : Input.GetAxis("Horizontal");
-        float newInputY = this.joystickMovement.joyStickPosY != 0 ? this.joystickMovement.joyStickPosY : Input.GetAxis("Vertical");
-
-        if ((movementInputX != newInputX) || (movementInputY != newInputY))
-            this.photonView.RPC("UpdateMovementInput_RPC", PhotonTargets.AllViaServer, newInputX, newInputY);
-    }
-
-    [PunRPC]
-    void UpdateMovementInput_RPC(float newInputX, float newInputY)
-    {
-        movementInputX = newInputX;
-        movementInputY = newInputY;
-    }
-    */
 
 	//---------------------------
 	//      Actions
