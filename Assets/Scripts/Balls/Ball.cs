@@ -5,6 +5,7 @@ using UnityEngine;
 public enum BallState : byte
 {
     Unpicked,
+    Picked,
     Shooting
 }
 
@@ -25,8 +26,11 @@ public class Ball : Photon.MonoBehaviour, IPunObservable
     // Variables
 	[HideInInspector] public Rigidbody body;
     BallState state;
-    Character attacker;    // The character shoots this ball
-    Vector3 startingVector;    // The starting vector direction of the shooting ball
+    Character attacker;     // The character shoots this ball
+    Vector3 direction = Vector3.zero;            // The starting vector direction of the shooting ball
+    float speed = 0;
+    float bounciness = 1.0f;
+    int bounceTimes;      // Number of times this ball bounces
 
     // Const Variables
 	const float safeSpeed = 5f;
@@ -85,15 +89,16 @@ public class Ball : Photon.MonoBehaviour, IPunObservable
                 // Get direction
                 else if (i == 2)
                 {
-                    this.startingVector = (Vector3)data[2];
+                    this.direction = (Vector3)data[2];
                 }
             }
         }
 
         // Start the ball as projectile if it meets the following requirements
-        if ((State == BallState.Shooting) && (attacker != null))
+        if (State == BallState.Shooting)
         {
-            Shoot((int)data[3]);
+            if (PhotonNetwork.isMasterClient)
+                Shoot(this.transform.position, (int)data[3], this.direction, GetBallStartSpeed());
         }
     }
 
@@ -112,11 +117,29 @@ public class Ball : Photon.MonoBehaviour, IPunObservable
 		}
 	}
 
-	void Update()
+	void FixedUpdate()
     {
+        UpdateMovement();
+
         // Let only the master client to update the shooting state
+        /*
         if (this.photonView.isMine)
             UpdateShootingBallState();
+        */
+    }
+
+    void UpdateMovement()
+    {
+        if (this.State == BallState.Picked)
+            return;
+
+        if (this.direction == Vector3.zero)
+            return;
+
+        if (this.speed == 0)
+            return;
+
+        this.transform.Translate(this.direction * this.speed * Time.fixedDeltaTime);
     }
 
     // Reset ball status to Unpicked if ball's velocity is lower than safe speed
@@ -155,11 +178,28 @@ public class Ball : Photon.MonoBehaviour, IPunObservable
     //---------------------------
     void OnCollisionEnter(Collision col)
     {
+        if (PhotonNetwork.isMasterClient)
+            OnHitBounce(col);
+
+        /*
         // Player character collision event is handled by character class because of CharacterController class.
         if (col.gameObject.tag == "Player")
         {
-            OnHitCharacter(col.gameObject.GetComponent<Character>());
+            //OnHitCharacter(col.gameObject.GetComponent<Character>());
         }
+        */
+    }
+
+    void OnHitBounce(Collision col)
+    {
+        if (!PhotonNetwork.isMasterClient)
+            return;
+
+        this.bounceTimes += 1;
+        Vector3 reflectDir = new Vector3(col.contacts[0].normal.x, 0, col.contacts[0].normal.z);
+        this.direction = Vector3.Reflect(this.direction, reflectDir).normalized;
+
+        Shoot(this.transform.position, PhotonNetwork.ServerTimestamp, this.direction, GetBallPostBounceSpeed());
     }
 
     public void OnHitCharacter(Character target)
@@ -167,7 +207,7 @@ public class Ball : Photon.MonoBehaviour, IPunObservable
         if (this.State == BallState.Unpicked)
             PickUp(target);
         else if (this.State == BallState.Shooting)
-            Hit(target);
+            Hit(target);  
     }
 
     //---------------------------
@@ -195,23 +235,32 @@ public class Ball : Photon.MonoBehaviour, IPunObservable
         PhotonNetwork.Destroy(this.gameObject);
     }
 
-	//---------------------------
-	//      Shoot
-	//---------------------------
-    void Shoot(int spawnTime)
+    //---------------------------
+    //      Shoot
+    //---------------------------
+    void Shoot(Vector3 shootPos, int shootTime, Vector3 shootDir, float shootSpeed)
     {
-        int deltaTime = PhotonNetwork.ServerTimestamp - spawnTime;
-        float startingSpeed = GetBallStartSpeed();
+        if (!PhotonNetwork.isMasterClient)
+            return;
 
-        this.transform.position += new Vector3(this.body.velocity.x * deltaTime, 0, this.body.velocity.z * deltaTime);
-        this.body.velocity = new Vector3(this.startingVector.x * startingSpeed, 0, this.startingVector.z * startingSpeed);
+        this.photonView.RPC("Shoot_RPC", PhotonTargets.All, shootPos, shootTime, shootDir, shootSpeed);
     }
 
-	//---------------------------
-	//      Hit
-	//---------------------------
-	// Called on the colliding character
-	public virtual void Hit(Character character)
+    [PunRPC]
+    void Shoot_RPC(Vector3 shootPos, int shootTime, Vector3 shootDir, float shootSpeed)
+    {
+        float timeOffset = (PhotonNetwork.ServerTimestamp - shootTime) / 1000;
+        this.transform.position = shootPos + new Vector3(shootDir.x * shootSpeed * timeOffset, 0, shootDir.z * shootSpeed * timeOffset);
+
+        this.direction = shootDir;
+        this.speed = shootSpeed;
+    }
+
+    //---------------------------
+    //      Hit
+    //---------------------------
+    // Called on the colliding character
+    public virtual void Hit(Character character)
 	{
 		character.RecieveDamage(GetBallDamage());
 	}
@@ -226,7 +275,12 @@ public class Ball : Photon.MonoBehaviour, IPunObservable
         return attacker.power * ballSpeedMultiplier;
     }
 
-	public virtual float GetBallDamage()
+    public virtual float GetBallPostBounceSpeed()
+    {
+        return this.speed * Mathf.Pow(bounciness, this.bounceTimes);
+    }
+
+    public virtual float GetBallDamage()
 	{
 		float ballDamageMultiplier = 0.5f;
 
@@ -256,12 +310,12 @@ public class Ball : Photon.MonoBehaviour, IPunObservable
         return PhotonNetwork.Instantiate(ballPrefab.name, spawnPos, Quaternion.identity, 0, data).GetComponent<Ball>();
     }
 
-    public static Ball SpawnShootingBall(Ball ballPrefab, Vector3 spawnPos, Character attacker, Vector3 aimingVector, int spawnTime)
+    public static Ball SpawnShootingBall(Ball ballPrefab, Vector3 spawnPos, Character attacker, Vector3 dir, int spawnTime)
     {
         object[] data = new object[4];
         data[0] = BallState.Shooting;
         data[1] = attacker;
-        data[2] = aimingVector;
+        data[2] = dir;
         data[3] = spawnTime;
 
         return PhotonNetwork.Instantiate(ballPrefab.name, spawnPos, Quaternion.identity, 0, data).GetComponent<Ball>();
