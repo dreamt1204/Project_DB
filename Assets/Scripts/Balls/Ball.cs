@@ -5,7 +5,6 @@ using UnityEngine;
 public enum BallState : byte
 {
     Unpicked,
-    Picked,
     Shooting
 }
 
@@ -17,6 +16,7 @@ public class Ball : Photon.MonoBehaviour, IPunObservable
     //===========================
     // Prefabs
     [Header("Materials")]
+    public PhysicMaterial PhysicMaterialSafe;
     public Material MaterialSafe;
     public Material MaterialDamage;
 
@@ -29,11 +29,11 @@ public class Ball : Photon.MonoBehaviour, IPunObservable
     Character attacker;     // The character shoots this ball
     Vector3 direction = Vector3.zero;            // The starting vector direction of the shooting ball
     float speed = 0;
-    float bounciness = 1.0f;
     int bounceTimes;      // Number of times this ball bounces
 
-    // Const Variables
-	const float safeSpeed = 5f;
+    int maxBounceTimes = 1;
+    float bounciness = 0.75f;
+    float safeSpeed = 10f;
 
     //---------------------------
     //      Properties
@@ -69,6 +69,11 @@ public class Ball : Photon.MonoBehaviour, IPunObservable
 
     void OnPhotonInstantiate(PhotonMessageInfo info)
     {
+        if (PhotonNetwork.isMasterClient)
+            this.body.isKinematic = false;
+        else
+            this.body.isKinematic = true;
+
         object[] data = this.photonView.instantiationData;
 
         if (data != null)
@@ -109,28 +114,25 @@ public class Ball : Photon.MonoBehaviour, IPunObservable
 	{
 		if(stream.isWriting)
 		{
-			stream.SendNext(this.State);
+            stream.SendNext(this.State);
 		}
 		else
 		{
-			this.State = (BallState)stream.ReceiveNext();
-		}
+            this.State = (BallState)stream.ReceiveNext();
+        }
 	}
 
 	void FixedUpdate()
     {
         UpdateMovement();
 
-        // Let only the master client to update the shooting state
-        /*
-        if (this.photonView.isMine)
-            UpdateShootingBallState();
-        */
+        if (PhotonNetwork.isMasterClient)
+            TryTransformSlowBallToSafeBall();
     }
 
     void UpdateMovement()
     {
-        if (this.State == BallState.Picked)
+        if (this.State != BallState.Shooting)
             return;
 
         if (this.direction == Vector3.zero)
@@ -142,18 +144,19 @@ public class Ball : Photon.MonoBehaviour, IPunObservable
         this.transform.Translate(this.direction * this.speed * Time.fixedDeltaTime);
     }
 
-    // Reset ball status to Unpicked if ball's velocity is lower than safe speed
-    void UpdateShootingBallState()
+    void TryTransformSlowBallToSafeBall()
 	{
-		if (this.State != BallState.Shooting)
+        if (!PhotonNetwork.isMasterClient)
+            return;
+
+        if (this.State != BallState.Shooting)
 			return;
 
-		float currentBallSpeed = this.body.velocity.magnitude;
-		if (Mathf.Floor(currentBallSpeed) <= safeSpeed)
-		{
-            this.State = BallState.Unpicked;
-		}
-	}
+        if (this.speed > this.safeSpeed)
+            return;
+
+        TransformToSafeBall(this.direction);
+    }
 
     [PunRPC]
     void UpdateBallState(BallState newState)
@@ -196,8 +199,18 @@ public class Ball : Photon.MonoBehaviour, IPunObservable
             return;
 
         this.bounceTimes += 1;
+        
         Vector3 reflectDir = new Vector3(col.contacts[0].normal.x, 0, col.contacts[0].normal.z);
         this.direction = Vector3.Reflect(this.direction, reflectDir).normalized;
+
+        if (this.maxBounceTimes >= 0)
+        {
+            if (this.bounceTimes >= this.maxBounceTimes)
+            {
+                TransformToSafeBall(this.direction);
+                return;
+            }
+        }
 
         Shoot(this.transform.position, PhotonNetwork.ServerTimestamp, this.direction, GetBallPostBounceSpeed());
     }
@@ -236,6 +249,36 @@ public class Ball : Photon.MonoBehaviour, IPunObservable
     }
 
     //---------------------------
+    //      Transform To Safe Ball
+    //---------------------------
+    void TransformToSafeBall(Vector3 droppingDir)
+    {
+        if (!PhotonNetwork.isMasterClient)
+            return;
+
+        this.photonView.RPC("TransformToSafeBall_RPC", PhotonTargets.All, this.transform.position, droppingDir);
+    }
+
+    [PunRPC]
+    void TransformToSafeBall_RPC(Vector3 droppingPos,Vector3 droppingDir)
+    {
+        this.State = BallState.Unpicked;
+        this.direction = Vector3.zero;
+        float droppingSpeed = this.speed * 5;
+        this.speed = 0;
+        this.attacker = null;
+
+        this.transform.position = droppingPos;
+
+        GetComponent<SphereCollider>().material = PhysicMaterialSafe;
+        this.body.isKinematic = false;
+        this.body.useGravity = true;
+        this.body.drag = 1;
+        this.body.angularDrag = 1;
+        this.body.AddForce(droppingDir * this.safeSpeed * 10);
+    }
+
+    //---------------------------
     //      Shoot
     //---------------------------
     void Shoot(Vector3 shootPos, int shootTime, Vector3 shootDir, float shootSpeed)
@@ -245,7 +288,7 @@ public class Ball : Photon.MonoBehaviour, IPunObservable
 
         this.photonView.RPC("Shoot_RPC", PhotonTargets.All, shootPos, shootTime, shootDir, shootSpeed);
     }
-
+    
     [PunRPC]
     void Shoot_RPC(Vector3 shootPos, int shootTime, Vector3 shootDir, float shootSpeed)
     {

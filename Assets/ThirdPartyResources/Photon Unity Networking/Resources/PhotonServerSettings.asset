@@ -50,4 +50,5 @@ MonoBehaviour:
   - RecieveDamage_RPC
   - Shoot_RPC
   - UpdateMovementInput_RPC
+  - TransformToSafeBall_RPC
   DisableAutoOpenWizard: 1
